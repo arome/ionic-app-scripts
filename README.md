@@ -1,6 +1,9 @@
 [![npm version](https://img.shields.io/npm/v/@ionic/app-scripts.svg)](https://www.npmjs.com/package/@ionic/app-scripts)
 [![Circle CI](https://circleci.com/gh/ionic-team/ionic-app-scripts.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/ionic-team/ionic-app-scripts)
 
+# Purpose of this Fork
+Changed the linting from TSLint to ESLint.
+
 # DISCLAIMER: NO LONGER MAINTAINED
 Oh, [hello there](https://media.giphy.com/media/8JTFsZmnTR1Rs1JFVP/giphy.gif)! Ionic App Scripts is a tool tied specifically to version 3.x of Ionic Framework. Since the release of version 4.0 of Ionic Framework, we are no longer using Ionic App Scripts for building in Ionic Framework. Version 3 of Ionic Framework is no longer actively maintained by us. For more information on which versions are active, see our [support policy](https://ionicframework.com/docs/reference/support#framework-maintenance-and-support-status).
 Due to this, we are no longer maintaining Ionic App Scripts and we recommend developers update their apps to the latest framework release. This provides several new features, bug fixes, performance improvements, as well as up to date tooling for Ionic apps. For more details on how to upgrade, check out our [migration guide](https://ionicframework.com/docs/reference/migration).
@@ -248,7 +251,7 @@ npm run lint --bailOnLintError true
 - [Autoprefixer](https://github.com/postcss/autoprefixer)
 - [UglifyJS](https://lisperator.net/uglifyjs/)
 - [CleanCss](https://github.com/jakubpawlowicz/clean-css)
-- [TSLint](https://palantir.github.io/tslint/)
+- [ESLint](https://github.com/eslint/eslint)
 
 ## Contributing
 
