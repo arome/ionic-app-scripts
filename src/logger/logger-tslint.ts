@@ -3,7 +3,7 @@ import { splitLineBreaks } from '../util/helpers';
 import { BuildContext, Diagnostic, PrintLine } from '../util/interfaces';
 import { Logger } from './logger';
 
-const STOP_CHARS = [
+export const STOP_CHARS = [
   ' ',
   '=',
   ',',

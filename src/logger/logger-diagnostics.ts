@@ -150,6 +150,15 @@ function loadBuildDiagnosticsHtml(buildDir: string) {
   } catch (e) {
     diagnosticsHtmlCache[DiagnosticsType.Sass] = false;
   }
+
+  try {
+    diagnosticsHtmlCache[DiagnosticsType.EsLint] = readFileSync(
+      getDiagnosticsFileName(buildDir, DiagnosticsType.EsLint),
+      'utf8'
+    );
+  } catch (e) {
+    diagnosticsHtmlCache[DiagnosticsType.EsLint] = false;
+  }
 }
 
 export function injectDiagnosticsHtml(buildDir: string, content: any) {
@@ -430,5 +439,6 @@ const MEH_LINES = [';', ':', '{', '}', '(', ')', '/**', '/*', '*/', '*', '({', '
 export const DiagnosticsType = {
   TypeScript: 'typescript',
   Sass: 'sass',
-  TsLint: 'tslint'
+  TsLint: 'tslint',
+  EsLint: 'eslint'
 };

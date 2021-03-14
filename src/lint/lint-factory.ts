@@ -1,4 +1,5 @@
-import { Configuration, Linter, LintResult } from 'tslint';
+import { Configuration, Linter } from 'tslint';
+import { ESLint } from 'eslint';
 import { Program, getPreEmitDiagnostics, Diagnostic } from 'typescript';
 import { BuildContext } from '../util/interfaces';
 import { isObject } from 'util';
@@ -18,17 +19,8 @@ export interface LinterConfig {
  * @param {string} filePath
  * @param {string} fileContents
  */
-export function lint(linter: Linter, config: LinterConfig, filePath: string, fileContents: string): void {
-  linter.lint(filePath, fileContents, config as any);
-}
-
-/**
- * Get the linter result
- * @param {Linter} linter
- * @return {LintResult}
- */
-export function getLintResult(linter: Linter): LintResult {
-  return linter.getResult();
+export function lint(linter: ESLint, filePath: string): void {
+  linter.lintFiles(filePath);
 }
 
 /**
@@ -42,7 +34,7 @@ export function typeCheck(
   context: BuildContext,
   program: Program,
   linterOptions?: LinterOptions
-): Promise<Diagnostic[]> {
+): Promise<readonly Diagnostic[]> {
   if (isObject(linterOptions) && linterOptions.typeCheck) {
     return Promise.resolve(getPreEmitDiagnostics(program));
   }
@@ -57,16 +49,6 @@ export function typeCheck(
  */
 export function createProgram(context: BuildContext, tsConfig: string): Program {
   return Linter.createProgram(tsConfig, context.rootDir);
-}
-
-/**
- * Get all files that are sourced in TS config
- * @param {BuildContext} context
- * @param {Program} program
- * @return {Array<string>}
- */
-export function getFileNames(context: BuildContext, program: Program): string[] {
-  return Linter.getFileNames(program);
 }
 
 /**
@@ -87,11 +69,6 @@ export function getTsLintConfig(tsLintConfig: string, linterOptions?: LinterOpti
  * @param {Program} program
  * @return {Linter}
  */
-export function createLinter(context: BuildContext, program: Program): Linter {
-  return new Linter(
-    {
-      fix: false
-    },
-    program
-  );
+export function createLinter(): ESLint {
+  return new ESLint({ fix: false });
 }

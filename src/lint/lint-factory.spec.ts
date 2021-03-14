@@ -2,15 +2,9 @@ import { Configuration, Linter } from 'tslint';
 import { DiagnosticCategory } from 'typescript';
 import * as ts from 'typescript';
 import { isObject } from 'util';
-import {
-  createLinter,
-  createProgram,
-  getFileNames,
-  getLintResult,
-  getTsLintConfig,
-  lint,
-  typeCheck
-} from './lint-factory';
+import { createLinter, createProgram, getTsLintConfig, lint, typeCheck } from './lint-factory';
+import { ESLint } from 'eslint';
+import { getFileNames, lintFiles } from './lint-utils';
 
 describe('lint factory', () => {
   describe('createProgram()', () => {
@@ -56,10 +50,8 @@ describe('lint factory', () => {
   describe('createLinter()', () => {
     it('should create a Linter', () => {
       const context: any = { rootDir: '' };
-      const program = createProgram(context, '');
-      const linter = createLinter(context, program);
-
-      expect(linter instanceof Linter).toBeTruthy();
+      const linter = createLinter();
+      expect(linter instanceof ESLint).toBeTruthy();
     });
   });
 
@@ -69,7 +61,7 @@ describe('lint factory', () => {
       const program = createProgram(context, '');
       const mockFiles = ['test.ts'];
       spyOn(Linter, 'getFileNames').and.returnValue(mockFiles);
-      const files = getFileNames(context, program);
+      const files = getFileNames(context, []);
 
       expect(Array.isArray(files)).toBeTruthy();
       expect(files).toEqual(mockFiles);
@@ -117,39 +109,13 @@ describe('lint factory', () => {
 
   describe('lint()', () => {
     it('should lint a file', () => {
-      const context: any = { rootDir: '' };
-      const program = createProgram(context, '');
-      const linter = createLinter(context, program);
+      const linter = createLinter();
       spyOn(linter, 'lint').and.returnValue(undefined);
-      const config = {};
       const filePath = 'test.ts';
-      const fileContents = 'const test = true;';
 
-      lint(linter, config, filePath, fileContents);
+      lint(linter, filePath);
 
-      expect(linter.lint).toHaveBeenCalledWith(filePath, fileContents, config);
-    });
-  });
-  describe('getLintResult()', () => {
-    it('should get the lint results after linting a file', () => {
-      const context: any = { rootDir: '' };
-      const program = createProgram(context, '');
-      const linter = createLinter(context, program);
-      spyOn(linter, 'lint').and.returnValue(undefined);
-      const mockResult: any = {};
-      spyOn(linter, 'getResult').and.returnValue(mockResult);
-      const config = {
-        jsRules: new Map(),
-        rules: new Map()
-      };
-      const filePath = 'test.ts';
-      const fileContents = 'const test = true;';
-
-      lint(linter, config, filePath, fileContents);
-
-      const result = getLintResult(linter);
-      expect(isObject(result)).toBeTruthy();
-      expect(result).toEqual(mockResult);
+      expect(linter.lintFiles).toHaveBeenCalledWith(filePath);
     });
   });
 });

@@ -1,5 +1,3 @@
-import { join } from 'path';
-
 import {
   readVersionOfDependencies,
   scanSrcTsFiles,
@@ -15,13 +13,13 @@ import { lint, lintUpdate } from './lint';
 import { Logger } from './logger/logger';
 import { minifyCss, minifyJs } from './minify';
 import { ngc } from './ngc';
-import { getTsConfigAsync, TsConfig } from './transpile';
 import { postprocess } from './postprocess';
 import { preprocess, preprocessUpdate } from './preprocess';
 import { sass, sassUpdate } from './sass';
 import { templateUpdate } from './template';
 import { transpile, transpileUpdate, transpileDiagnosticsOnly } from './transpile';
 import * as Constants from './util/constants';
+import { ENV_BAIL_ON_LINT_ERROR } from './util/constants';
 import { BuildError } from './util/errors';
 import { emit, EventType } from './util/events';
 import { getBooleanPropertyValue, readFileAsync, setContext } from './util/helpers';
@@ -105,7 +103,7 @@ function buildProject(context: BuildContext) {
 }
 
 export function buildUpdate(changedFiles: ChangedFile[], context: BuildContext) {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     const logger = new Logger('build');
 
     buildId++;
@@ -116,49 +114,48 @@ export function buildUpdate(changedFiles: ChangedFile[], context: BuildContext) 
     };
     emit(EventType.BuildUpdateStarted, buildUpdateMsg);
 
+    function buildUpdateCompleted(reloadApp = false) {
+      logger.finish('green', true);
+      Logger.newLine();
+
+      // we did it!
+      resolve();
+      emit(EventType.BuildUpdateCompleted, {
+        buildId,
+        reloadApp
+      });
+    }
+
     function buildTasksDone(resolveValue: BuildTaskResolveValue) {
       // all build tasks have been resolved or one of them
       // bailed early, stopping all others to not run
-
       parallelTasksPromise.then(() => {
         // all parallel tasks are also done
         // so now we're done done
-        const buildUpdateMsg: BuildUpdateMessage = {
-          buildId: buildId,
-          reloadApp: resolveValue.requiresAppReload
-        };
-        emit(EventType.BuildUpdateCompleted, buildUpdateMsg);
-
         if (!resolveValue.requiresAppReload) {
           // just emit that only a certain file changed
           // this one is useful when only a sass changed happened
           // and the webpack only needs to livereload the css
           // but does not need to do a full page refresh
           emit(EventType.FileChange, resolveValue.changedFiles);
-        }
-
-        let requiresLintUpdate = false;
-        for (const changedFile of changedFiles) {
-          if (changedFile.ext === '.ts') {
-            if (changedFile.event === 'change' || changedFile.event === 'add') {
-              requiresLintUpdate = true;
-              break;
-            }
-          }
-        }
-        if (requiresLintUpdate) {
+        } else {
           // a ts file changed, so let's lint it too, however
           // this task should run as an after thought
           if (getBooleanPropertyValue(Constants.ENV_ENABLE_LINT)) {
-            lintUpdate(changedFiles, context, false);
+            lintUpdate(changedFiles, context, false)
+              .then(() => {
+                buildUpdateCompleted();
+              })
+              .catch((err: Error) => {
+                if (getBooleanPropertyValue(ENV_BAIL_ON_LINT_ERROR)) {
+                  throw logger.fail(err);
+                }
+                buildUpdateCompleted();
+              });
+          } else {
+            buildUpdateCompleted();
           }
         }
-
-        logger.finish('green', true);
-        Logger.newLine();
-
-        // we did it!
-        resolve();
       });
     }
 

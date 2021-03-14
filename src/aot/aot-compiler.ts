@@ -1,13 +1,10 @@
-import { readFileSync } from 'fs-extra';
-import { extname, normalize, resolve } from 'path';
+import { extname } from 'path';
 
 import 'reflect-metadata';
 
 import {
   CompilerHost,
   CompilerOptions,
-  DiagnosticCategory,
-  ParsedCommandLine,
   Program,
   transpileModule,
   TranspileOptions,

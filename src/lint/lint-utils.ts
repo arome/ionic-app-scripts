@@ -1,49 +1,30 @@
-import * as fs from 'fs';
-import { Linter, LintResult, RuleFailure } from 'tslint';
-import { Diagnostic, Program } from 'typescript';
-import { BuildError } from '../util/errors';
-import { createLinter, getLintResult, getTsLintConfig, lint, LinterOptions, typeCheck } from './lint-factory';
-import { readFileAsync } from '../util/helpers';
+import { RuleFailure } from 'tslint';
+import { createLinter, typeCheck } from './lint-factory';
 import { BuildContext } from '../util/interfaces';
-import { Logger } from '../logger/logger';
-import { printDiagnostics, DiagnosticsType } from '../logger/logger-diagnostics';
+import { runEsLintDiagnostics } from '../logger/logger-eslint';
 import { runTypeScriptDiagnostics } from '../logger/logger-typescript';
-import { runTsLintDiagnostics } from '../logger/logger-tslint';
+import { ESLint } from 'eslint';
+import { BuildError } from '../util/errors';
+import { clearDiagnostics, DiagnosticsType, printDiagnostics } from '../logger/logger-diagnostics';
+import { Diagnostic, Program } from 'typescript';
 
 /**
  * Lint files
  * @param {BuildContext} context
  * @param {Program} program
- * @param {string} tsLintConfig - TSLint config file path
+ * @param {string} esLintConfig - TSLint config file path
  * @param {Array<string>} filePaths
- * @param {LinterOptions} linterOptions
  */
-export function lintFiles(
+export async function lintFiles(
   context: BuildContext,
   program: Program,
-  tsLintConfig: string,
-  filePaths: string[],
-  linterOptions?: LinterOptions
+  filePaths: string | string[] = 'src/**'
 ): Promise<void> {
-  const linter = createLinter(context, program);
-  const config = getTsLintConfig(tsLintConfig, linterOptions);
-
-  return typeCheck(context, program, linterOptions)
+  const linter = createLinter();
+  return typeCheck(context, program)
     .then((diagnostics) => processTypeCheckDiagnostics(context, diagnostics))
-    .then(() =>
-      Promise.all(filePaths.map((filePath) => lintFile(linter, config, filePath)))
-        .then(() => getLintResult(linter))
-        // NOTE: We only need to process the lint result after we ran the linter on all the files,
-        // otherwise we'll end up with duplicated messages if we process the result after each file gets linted.
-        .then((result: LintResult) => processLintResult(context, result))
-    );
-}
-
-export function lintFile(linter: Linter, config: any, filePath: string): Promise<void> {
-  if (isMpegFile(filePath)) {
-    return Promise.reject(`${filePath} is not a valid TypeScript file`);
-  }
-  return readFileAsync(filePath).then((fileContents: string) => lint(linter, config, filePath, fileContents));
+    .then(() => linter.lintFiles(filePaths))
+    .then((results: ESLint.LintResult[]) => results.forEach((result) => processLintResult(context, result)));
 }
 
 /**
@@ -52,7 +33,7 @@ export function lintFile(linter: Linter, config: any, filePath: string): Promise
  * @param {BuildContext} context
  * @param {Array<Diagnostic>} tsDiagnostics
  */
-export function processTypeCheckDiagnostics(context: BuildContext, tsDiagnostics: Diagnostic[]) {
+export function processTypeCheckDiagnostics(context: BuildContext, tsDiagnostics: readonly Diagnostic[]) {
   if (tsDiagnostics.length > 0) {
     const diagnostics = runTypeScriptDiagnostics(context, tsDiagnostics);
     printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, false);
@@ -68,14 +49,15 @@ export function processTypeCheckDiagnostics(context: BuildContext, tsDiagnostics
  * @param {BuildContext} context
  * @param {LintResult} result
  */
-export function processLintResult(context: BuildContext, result: LintResult) {
+export function processLintResult(context: BuildContext, result: ESLint.LintResult) {
+  clearDiagnostics(context, DiagnosticsType.EsLint);
   const files: string[] = [];
 
   // Only process the lint result if there are errors or warnings (there's no point otherwise)
   if (result.errorCount !== 0 || result.warningCount !== 0) {
-    const diagnostics = runTsLintDiagnostics(context, result.failures);
-    printDiagnostics(context, DiagnosticsType.TsLint, diagnostics, true, false);
-    files.push(...getFileNames(context, result.failures));
+    const diagnostics = runEsLintDiagnostics(context, result);
+    printDiagnostics(context, DiagnosticsType.EsLint, diagnostics, true, true);
+    files.push(result.filePath);
   }
 
   if (files.length > 0) {
@@ -85,7 +67,7 @@ export function processLintResult(context: BuildContext, result: LintResult) {
 }
 
 export function generateErrorMessageForFiles(failingFiles: string[], message?: string) {
-  return `${message || 'The following files did not pass tslint:'}\n${failingFiles.join('\n')}`;
+  return `${message || 'The following files did not pass eslint:'}\n${failingFiles.join('\n')}`;
 }
 
 export function getFileNames(context: BuildContext, failures: RuleFailure[]): string[] {
@@ -94,21 +76,4 @@ export function getFileNames(context: BuildContext, failures: RuleFailure[]): st
 
 export function removeDuplicateFileNames(fileNames: string[]) {
   return Array.from(new Set(fileNames));
-}
-
-function isMpegFile(file: string) {
-  const buffer = new Buffer(256);
-  buffer.fill(0);
-
-  const fd = fs.openSync(file, 'r');
-  try {
-    fs.readSync(fd, buffer, 0, 256, null);
-    if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-      Logger.debug(`tslint: ${file}: ignoring MPEG transport stream`);
-      return true;
-    }
-  } finally {
-    fs.closeSync(fd);
-  }
-  return false;
 }

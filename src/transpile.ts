@@ -93,7 +93,7 @@ export function transpileUpdate(changedFiles: ChangedFile[], context: BuildConte
  */
 export function transpileWorker(context: BuildContext, workerConfig: TranspileWorkerConfig) {
   // let's do this
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     clearDiagnostics(context, DiagnosticsType.TypeScript);
 
     // get the tsconfig data
@@ -263,7 +263,7 @@ function transpileUpdateWorker(
 }
 
 export function transpileDiagnosticsOnly(context: BuildContext) {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     workerEvent.once('DiagnosticsWorkerDone', () => {
       resolve();
     });

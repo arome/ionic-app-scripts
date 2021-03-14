@@ -8,12 +8,7 @@ import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/c
 import * as Constants from './util/constants';
 import { BuildError, IgnorableError } from './util/errors';
 import { emit, EventType } from './util/events';
-import {
-  getBooleanPropertyValue,
-  printDependencyMap,
-  webpackStatsToDependencyMap,
-  writeFileAsync
-} from './util/helpers';
+import { getBooleanPropertyValue, printDependencyMap, webpackStatsToDependencyMap } from './util/helpers';
 import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
 
 const eventEmitter = new EventEmitter();

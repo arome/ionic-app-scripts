@@ -66,7 +66,7 @@ function startWatchers(context: BuildContext, configFile: string) {
 }
 
 function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     // If a file isn't found (probably other scenarios too),
     // Chokidar watches don't always trigger the ready or error events
     // so set a timeout, and clear it if they do fire

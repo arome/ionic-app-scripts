@@ -68,7 +68,7 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   readFile(path: string, callback: Function): any {
     const file = this.fileCache.get(path);
     if (file) {
-      callback(null, new Buffer(file.content));
+      callback(null, Buffer.from(file.content));
       return;
     }
     return this.inputFileSystem.readFile(path, callback);

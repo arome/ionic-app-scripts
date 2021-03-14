@@ -9,7 +9,7 @@ import * as ts from 'typescript';
  * error reporting within a terminal. So, yeah, let's code it up, shall we?
  */
 
-export function runTypeScriptDiagnostics(context: BuildContext, tsDiagnostics: ts.Diagnostic[]) {
+export function runTypeScriptDiagnostics(context: BuildContext, tsDiagnostics: readonly ts.Diagnostic[]) {
   return tsDiagnostics.map((tsDiagnostic) => {
     return loadDiagnostic(context, tsDiagnostic);
   });
