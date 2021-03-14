@@ -6,10 +6,14 @@ import { Logger } from './logger';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import * as chalk from 'chalk';
 
-
-export function printDiagnostics(context: BuildContext, diagnosticsType: string, diagnostics: Diagnostic[], consoleLogDiagnostics: boolean, writeHtmlDiagnostics: boolean) {
+export function printDiagnostics(
+  context: BuildContext,
+  diagnosticsType: string,
+  diagnostics: Diagnostic[],
+  consoleLogDiagnostics: boolean,
+  writeHtmlDiagnostics: boolean
+) {
   if (diagnostics && diagnostics.length) {
-
     if (consoleLogDiagnostics) {
       diagnostics.forEach(consoleLogDiagnostic);
     }
@@ -22,7 +26,6 @@ export function printDiagnostics(context: BuildContext, diagnosticsType: string,
   }
 }
 
-
 function consoleLogDiagnostic(d: Diagnostic) {
   if (d.level === 'warn') {
     Logger.warn(d.header);
@@ -30,7 +33,7 @@ function consoleLogDiagnostic(d: Diagnostic) {
     Logger.error(d.header);
   }
 
-  Logger.wordWrap([d.messageText]).forEach(m => {
+  Logger.wordWrap([d.messageText]).forEach((m) => {
     console.log(m);
   });
   console.log('');
@@ -38,7 +41,7 @@ function consoleLogDiagnostic(d: Diagnostic) {
   if (d.lines && d.lines.length) {
     const lines = prepareLines(d.lines, 'text');
 
-    lines.forEach(l => {
+    lines.forEach((l) => {
       if (!isMeaningfulLine(l.text)) {
         return;
       }
@@ -73,16 +76,14 @@ function consoleLogDiagnostic(d: Diagnostic) {
 function consoleHighlightError(errorLine: string, errorCharStart: number, errorLength: number) {
   let rightSideChars = errorLine.length - errorCharStart + errorLength - 1;
   while (errorLine.length + Logger.INDENT.length > Logger.MAX_LEN) {
-    if (errorCharStart > (errorLine.length - errorCharStart + errorLength) && errorCharStart > 5) {
+    if (errorCharStart > errorLine.length - errorCharStart + errorLength && errorCharStart > 5) {
       // larger on left side
       errorLine = errorLine.substr(1);
       errorCharStart--;
-
     } else if (rightSideChars > 1) {
       // larger on right side
       errorLine = errorLine.substr(0, errorLine.length - 1);
       rightSideChars--;
-
     } else {
       break;
     }
@@ -101,8 +102,7 @@ function consoleHighlightError(errorLine: string, errorCharStart: number, errorL
   return lineChars.join('');
 }
 
-
-let diagnosticsHtmlCache: {[key: string]: any} = {};
+let diagnosticsHtmlCache: { [key: string]: any } = {};
 
 export function clearDiagnosticsCache() {
   diagnosticsHtmlCache = {};
@@ -114,7 +114,6 @@ export function clearDiagnostics(context: BuildContext, type: string) {
     unlinkSync(getDiagnosticsFileName(context.buildDir, type));
   } catch (e) {}
 }
-
 
 export function hasDiagnostics(buildDir: string) {
   loadBuildDiagnosticsHtml(buildDir);
@@ -129,11 +128,13 @@ export function hasDiagnostics(buildDir: string) {
   return false;
 }
 
-
 function loadBuildDiagnosticsHtml(buildDir: string) {
   try {
     if (diagnosticsHtmlCache[DiagnosticsType.TypeScript] === undefined) {
-      diagnosticsHtmlCache[DiagnosticsType.TypeScript] = readFileSync(getDiagnosticsFileName(buildDir, DiagnosticsType.TypeScript), 'utf8');
+      diagnosticsHtmlCache[DiagnosticsType.TypeScript] = readFileSync(
+        getDiagnosticsFileName(buildDir, DiagnosticsType.TypeScript),
+        'utf8'
+      );
     }
   } catch (e) {
     diagnosticsHtmlCache[DiagnosticsType.TypeScript] = false;
@@ -141,13 +142,15 @@ function loadBuildDiagnosticsHtml(buildDir: string) {
 
   try {
     if (diagnosticsHtmlCache[DiagnosticsType.Sass] === undefined) {
-      diagnosticsHtmlCache[DiagnosticsType.Sass] = readFileSync(getDiagnosticsFileName(buildDir, DiagnosticsType.Sass), 'utf8');
+      diagnosticsHtmlCache[DiagnosticsType.Sass] = readFileSync(
+        getDiagnosticsFileName(buildDir, DiagnosticsType.Sass),
+        'utf8'
+      );
     }
   } catch (e) {
     diagnosticsHtmlCache[DiagnosticsType.Sass] = false;
   }
 }
-
 
 export function injectDiagnosticsHtml(buildDir: string, content: any) {
   if (!hasDiagnostics(buildDir)) {
@@ -173,7 +176,6 @@ export function injectDiagnosticsHtml(buildDir: string, content: any) {
 
   return contentStr;
 }
-
 
 export function getDiagnosticsHtmlContent(buildDir: string, includeDiagnosticsHtml?: string) {
   const c: string[] = [];
@@ -210,7 +212,6 @@ export function getDiagnosticsHtmlContent(buildDir: string, includeDiagnosticsHt
   return c.join('\n');
 }
 
-
 export function generateDiagnosticHtml(d: Diagnostic) {
   const c: string[] = [];
 
@@ -221,7 +222,11 @@ export function generateDiagnosticHtml(d: Diagnostic) {
   const title = `${titleCase(d.type)} ${titleCase(d.level)}`;
   c.push(`<div class="ion-diagnostic-title">${escapeHtml(title)}</div>`);
 
-  c.push(`<div class="ion-diagnostic-message" data-error-code="${escapeHtml(d.type)}-${escapeHtml(d.code)}">${escapeHtml(d.messageText)}</div>`);
+  c.push(
+    `<div class="ion-diagnostic-message" data-error-code="${escapeHtml(d.type)}-${escapeHtml(d.code)}">${escapeHtml(
+      d.messageText
+    )}</div>`
+  );
 
   c.push(`</div>`); // .ion-diagnostic-masthead
 
@@ -232,21 +237,22 @@ export function generateDiagnosticHtml(d: Diagnostic) {
   return c.join('\n');
 }
 
-
 export function generateCodeBlock(d: Diagnostic) {
   const c: string[] = [];
 
   c.push(`<div class="ion-diagnostic-file">`);
 
-  c.push(`<div class="ion-diagnostic-file-header" title="${escapeHtml(d.absFileName)}">${escapeHtml(d.relFileName)}</div>`);
+  c.push(
+    `<div class="ion-diagnostic-file-header" title="${escapeHtml(d.absFileName)}">${escapeHtml(d.relFileName)}</div>`
+  );
 
   if (d.lines && d.lines.length) {
     c.push(`<div class="ion-diagnostic-blob">`);
 
     c.push(`<table class="ion-diagnostic-table">`);
 
-    prepareLines(d.lines, 'html').forEach(l => {
-      c.push(`<tr${(l.errorCharStart > -1) ? ' class="ion-diagnostic-error-line"' : ''}>`);
+    prepareLines(d.lines, 'html').forEach((l) => {
+      c.push(`<tr${l.errorCharStart > -1 ? ' class="ion-diagnostic-error-line"' : ''}>`);
 
       c.push(`<td class="ion-diagnostic-blob-num" data-line-number="${l.lineNumber}"></td>`);
 
@@ -265,13 +271,12 @@ export function generateCodeBlock(d: Diagnostic) {
   return c.join('\n');
 }
 
-
 function jsConsoleSyntaxHighlight(text: string) {
   if (text.trim().startsWith('//')) {
     return chalk.dim(text);
   }
 
-  const words = text.split(' ').map(word => {
+  const words = text.split(' ').map((word) => {
     if (JS_KEYWORDS.indexOf(word) > -1) {
       return chalk.cyan(word);
     }
@@ -280,7 +285,6 @@ function jsConsoleSyntaxHighlight(text: string) {
 
   return words.join(' ');
 }
-
 
 function cssConsoleSyntaxHighlight(text: string, errorCharStart: number) {
   let cssProp = true;
@@ -308,8 +312,7 @@ function cssConsoleSyntaxHighlight(text: string, errorCharStart: number) {
   return chars.join('');
 }
 
-
-function prepareLines(orgLines: PrintLine[], code: 'text'|'html') {
+function prepareLines(orgLines: PrintLine[], code: 'text' | 'html') {
   const lines: PrintLine[] = JSON.parse(JSON.stringify(orgLines));
 
   for (let i = 0; i < 100; i++) {
@@ -328,13 +331,12 @@ function prepareLines(orgLines: PrintLine[], code: 'text'|'html') {
   return lines;
 }
 
-
-function eachLineHasLeadingWhitespace(lines: PrintLine[], code: 'text'|'html') {
+function eachLineHasLeadingWhitespace(lines: PrintLine[], code: 'text' | 'html') {
   if (!lines.length) {
     return false;
   }
   for (var i = 0; i < lines.length; i++) {
-    if ( !(<any>lines[i])[code] || (<any>lines[i])[code].length < 1) {
+    if (!(<any>lines[i])[code] || (<any>lines[i])[code].length < 1) {
       return false;
     }
     var firstChar = (<any>lines[i])[code].charAt(0);
@@ -345,29 +347,79 @@ function eachLineHasLeadingWhitespace(lines: PrintLine[], code: 'text'|'html') {
   return true;
 }
 
-
 const JS_KEYWORDS = [
-  'abstract', 'any', 'as', 'break', 'boolean', 'case', 'catch', 'class',
-  'console', 'const', 'continue', 'debugger', 'declare', 'default', 'delete',
-  'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'from',
-  'function', 'get', 'if', 'import', 'in', 'implements', 'Infinity',
-  'instanceof', 'let', 'module', 'namespace', 'NaN', 'new', 'number', 'null',
-  'public', 'private', 'protected', 'require', 'return', 'static', 'set',
-  'string', 'super', 'switch', 'this', 'throw', 'try', 'true', 'type',
-  'typeof', 'undefined', 'var', 'void', 'with', 'while', 'yield',
+  'abstract',
+  'any',
+  'as',
+  'break',
+  'boolean',
+  'case',
+  'catch',
+  'class',
+  'console',
+  'const',
+  'continue',
+  'debugger',
+  'declare',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'from',
+  'function',
+  'get',
+  'if',
+  'import',
+  'in',
+  'implements',
+  'Infinity',
+  'instanceof',
+  'let',
+  'module',
+  'namespace',
+  'NaN',
+  'new',
+  'number',
+  'null',
+  'public',
+  'private',
+  'protected',
+  'require',
+  'return',
+  'static',
+  'set',
+  'string',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'try',
+  'true',
+  'type',
+  'typeof',
+  'undefined',
+  'var',
+  'void',
+  'with',
+  'while',
+  'yield'
 ];
-
 
 function getDiagnosticsFileName(buildDir: string, type: string) {
   return join(buildDir, `.ion-diagnostic-${type}.html`);
 }
 
-
 function isMeaningfulLine(line: string) {
   if (line) {
     line = line.trim();
     if (line.length) {
-      return (MEH_LINES.indexOf(line) < 0);
+      return MEH_LINES.indexOf(line) < 0;
     }
   }
   return false;

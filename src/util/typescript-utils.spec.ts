@@ -59,7 +59,7 @@ export class TacoBell {
       expect(result).toEqual('HomePageModule');
     });
 
-    it('should throw an error an NgModule isn\'t found', () => {
+    it("should throw an error an NgModule isn't found", () => {
       const knownContent = `
 import { NgModule } from '@angular/core';
 import { DeepLinkModule } from 'ionic-angular';
@@ -205,7 +205,9 @@ export class AppModule {}
       const knownPath = '/some/fake/path';
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, messedUpContent);
 
-      expect(() => tsUtils.getNgModuleDecorator('coolFile.ts', sourceFile)).toThrowError('Could not find an "NgModule" decorator in coolFile.ts');
+      expect(() => tsUtils.getNgModuleDecorator('coolFile.ts', sourceFile)).toThrowError(
+        'Could not find an "NgModule" decorator in coolFile.ts'
+      );
     });
   });
 });
@@ -287,9 +289,9 @@ import { RootPageModule } from '../pages/root-page/root-page.module';
 export class AppModule {}
 `;
 
-  const knownPath = '/some/fake/path';
+    const knownPath = '/some/fake/path';
 
-  const expectedContent = `
+    const expectedContent = `
 import { NgModule } from \'@angular/core\';
 import { BrowserModule } from \'@angular/platform-browser\';
 import { IonicApp, IonicModule } from \'../../../../..\';
@@ -312,9 +314,9 @@ import { RootPageModule } from \'../pages/root-page/root-page.module\';
 export class AppModule {}
 `;
 
-  const result = tsUtils.appendNgModuleProvider(knownPath, knownContent, 'CoolProvider');
-  expect(result).toEqual(expectedContent);
-});
+    const result = tsUtils.appendNgModuleProvider(knownPath, knownContent, 'CoolProvider');
+    expect(result).toEqual(expectedContent);
+  });
 
   it('should return a modified file content for providers that already has one provider', () => {
     const knownContent = `
@@ -340,9 +342,9 @@ import { RootPageModule } from '../pages/root-page/root-page.module';
 export class AppModule {}
 `;
 
-  const knownPath = '/some/fake/path';
+    const knownPath = '/some/fake/path';
 
-  const expectedContent = `
+    const expectedContent = `
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule } from '../../../../..';
@@ -366,9 +368,7 @@ import { RootPageModule } from '../pages/root-page/root-page.module';
 export class AppModule {}
 `;
 
-
-  const result = tsUtils.appendNgModuleProvider(knownPath, knownContent, 'CoolProvider');
-  expect(result).toEqual(expectedContent);
+    const result = tsUtils.appendNgModuleProvider(knownPath, knownContent, 'CoolProvider');
+    expect(result).toEqual(expectedContent);
   });
 });
-

@@ -75,7 +75,6 @@ describe('Remove Fonts', () => {
         expect(unlinkSpy.calls.all()[19].args[0]).toEqual(join(fakeFontDirPath, 'roboto-regular.woff'));
         expect(unlinkSpy.calls.all()[20].args[0]).toEqual(join(fakeFontDirPath, 'roboto-regular.woff2'));
         expect(unlinkSpy.calls.all()[21].args[0]).toEqual(join(fakeFontDirPath, 'roboto.scss'));
-
       });
     });
 

@@ -7,10 +7,7 @@ import * as ts from 'typescript';
 
 import { getFileSystemCompilerHostInstance } from './aot/compiler-host-factory';
 import { buildJsSourceMaps } from './bundle';
-import {
-  getInjectDeepLinkConfigTypescriptTransform,
-  purgeDeepLinkDecoratorTSTransform }
-from './deep-linking/util';
+import { getInjectDeepLinkConfigTypescriptTransform, purgeDeepLinkDecoratorTSTransform } from './deep-linking/util';
 
 import {
   convertDeepLinkConfigEntriesToString,
@@ -28,11 +25,15 @@ import { inlineTemplate } from './template';
 import * as Constants from './util/constants';
 import { BuildError } from './util/errors';
 import { FileCache } from './util/file-cache';
-import { changeExtension, getBooleanPropertyValue, getParsedDeepLinkConfig, getStringPropertyValue } from './util/helpers';
+import {
+  changeExtension,
+  getBooleanPropertyValue,
+  getParsedDeepLinkConfig,
+  getStringPropertyValue
+} from './util/helpers';
 import { BuildContext, BuildState, ChangedFile, File } from './util/interfaces';
 
 export function transpile(context: BuildContext) {
-
   const workerConfig: TranspileWorkerConfig = {
     configFile: getTsConfigPath(context),
     writeInMemory: true,
@@ -49,12 +50,11 @@ export function transpile(context: BuildContext) {
       context.transpileState = BuildState.SuccessfulBuild;
       logger.finish();
     })
-    .catch(err => {
+    .catch((err) => {
       context.transpileState = BuildState.RequiresBuild;
       throw logger.fail(err);
     });
 }
-
 
 export function transpileUpdate(changedFiles: ChangedFile[], context: BuildContext) {
   const workerConfig: TranspileWorkerConfig = {
@@ -68,11 +68,13 @@ export function transpileUpdate(changedFiles: ChangedFile[], context: BuildConte
 
   const logger = new Logger('transpile update');
 
-  const changedTypescriptFiles = changedFiles.filter(changedFile => changedFile.ext === '.ts');
+  const changedTypescriptFiles = changedFiles.filter((changedFile) => changedFile.ext === '.ts');
 
   const promises: Promise<void>[] = [];
   for (const changedTypescriptFile of changedTypescriptFiles) {
-    promises.push(transpileUpdateWorker(changedTypescriptFile.event, changedTypescriptFile.filePath, context, workerConfig));
+    promises.push(
+      transpileUpdateWorker(changedTypescriptFile.event, changedTypescriptFile.filePath, context, workerConfig)
+    );
   }
 
   return Promise.all(promises)
@@ -80,22 +82,18 @@ export function transpileUpdate(changedFiles: ChangedFile[], context: BuildConte
       context.transpileState = BuildState.SuccessfulBuild;
       logger.finish();
     })
-    .catch(err => {
+    .catch((err) => {
       context.transpileState = BuildState.RequiresBuild;
       throw logger.fail(err);
     });
-
 }
-
 
 /**
  * The full TS build for all app files.
  */
 export function transpileWorker(context: BuildContext, workerConfig: TranspileWorkerConfig) {
-
   // let's do this
   return new Promise((resolve, reject) => {
-
     clearDiagnostics(context, DiagnosticsType.TypeScript);
 
     // get the tsconfig data
@@ -104,7 +102,6 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
     if (workerConfig.sourceMaps === false) {
       // the worker config say, "hey, don't ever bother making a source map, because."
       tsConfig.options.sourceMap = false;
-
     } else {
       // build the ts source maps if the bundler is going to use source maps
       tsConfig.options.sourceMap = buildJsSourceMaps(context);
@@ -129,7 +126,7 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
       // okay, purge the deep link files NOT using a transform
       const deepLinkFiles = filterTypescriptFilesForDeepLinks(context.fileCache);
 
-      deepLinkFiles.forEach(file => {
+      deepLinkFiles.forEach((file) => {
         file.content = purgeDeepLinkDecorator(file.content);
       });
 
@@ -147,16 +144,20 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
 
     const beforeArray: ts.TransformerFactory<ts.SourceFile>[] = [];
 
-    program.emit(undefined, (path: string, data: string, writeByteOrderMark: boolean, onError: Function, sourceFiles: ts.SourceFile[]) => {
-      if (workerConfig.writeInMemory) {
-        writeTranspiledFilesCallback(context.fileCache, path, data, workerConfig.inlineTemplate);
+    program.emit(
+      undefined,
+      (path: string, data: string, writeByteOrderMark: boolean, onError: Function, sourceFiles: ts.SourceFile[]) => {
+        if (workerConfig.writeInMemory) {
+          writeTranspiledFilesCallback(context.fileCache, path, data, workerConfig.inlineTemplate);
+        }
       }
-    });
+    );
 
     // cache the typescript program for later use
     cachedProgram = program;
 
-    const tsDiagnostics = program.getSyntacticDiagnostics()
+    const tsDiagnostics = program
+      .getSyntacticDiagnostics()
       .concat(program.getSemanticDiagnostics())
       .concat(program.getOptionsDiagnostics());
 
@@ -167,14 +168,12 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
       printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, true);
 
       reject(new BuildError('Failed to transpile program'));
-
     } else {
       // transpile success :)
       resolve();
     }
   });
 }
-
 
 export function canRunTranspileUpdate(event: string, filePath: string, context: BuildContext) {
   if (event === 'change' && context.fileCache) {
@@ -183,12 +182,16 @@ export function canRunTranspileUpdate(event: string, filePath: string, context: 
   return false;
 }
 
-
 /**
  * Iterative build for one TS file. If it's not an existing file change, or
  * something errors out then it falls back to do the full build.
  */
-function transpileUpdateWorker(event: string, filePath: string, context: BuildContext, workerConfig: TranspileWorkerConfig) {
+function transpileUpdateWorker(
+  event: string,
+  filePath: string,
+  context: BuildContext,
+  workerConfig: TranspileWorkerConfig
+) {
   try {
     clearDiagnostics(context, DiagnosticsType.TypeScript);
 
@@ -208,13 +211,16 @@ function transpileUpdateWorker(event: string, filePath: string, context: BuildCo
     const transpileOptions: ts.TranspileOptions = {
       compilerOptions: cachedTsConfig.options,
       fileName: filePath,
-      reportDiagnostics: true,
+      reportDiagnostics: true
     };
 
     // let's manually transpile just this one ts file
     // since it is an update, it's in memory already
     const sourceText = context.fileCache.get(filePath).content;
-    const textToTranspile = workerConfig.useTransforms && getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS) ? transformSource(filePath, sourceText) : sourceText;
+    const textToTranspile =
+      workerConfig.useTransforms && getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS)
+        ? transformSource(filePath, sourceText)
+        : sourceText;
 
     // transpile this one module
     const transpileOutput = ts.transpileModule(textToTranspile, transpileOptions);
@@ -233,7 +239,10 @@ function transpileUpdateWorker(event: string, filePath: string, context: BuildCo
       // convert the path to have a .js file extension for consistency
       const newPath = changeExtension(filePath, '.js');
 
-      const sourceMapFile = { path: newPath + '.map', content: transpileOutput.sourceMapText };
+      const sourceMapFile = {
+        path: newPath + '.map',
+        content: transpileOutput.sourceMapText
+      };
       let jsContent: string = transpileOutput.outputText;
       if (workerConfig.inlineTemplate) {
         // use original path for template inlining
@@ -253,9 +262,8 @@ function transpileUpdateWorker(event: string, filePath: string, context: BuildCo
   }
 }
 
-
 export function transpileDiagnosticsOnly(context: BuildContext) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     workerEvent.once('DiagnosticsWorkerDone', () => {
       resolve();
     });
@@ -297,7 +305,6 @@ function runDiagnosticsWorker(context: BuildContext) {
   diagnosticsWorker.send(msg);
 }
 
-
 export interface TranspileWorkerMessage {
   rootDir?: string;
   buildDir?: string;
@@ -305,13 +312,17 @@ export interface TranspileWorkerMessage {
   transpileSuccess?: boolean;
 }
 
-
 function cleanFileNames(context: BuildContext, fileNames: string[]) {
   // make sure we're not transpiling the prod when dev and stuff
   return fileNames;
 }
 
-function writeTranspiledFilesCallback(fileCache: FileCache, sourcePath: string, data: string, shouldInlineTemplate: boolean) {
+function writeTranspiledFilesCallback(
+  fileCache: FileCache,
+  sourcePath: string,
+  data: string,
+  shouldInlineTemplate: boolean
+) {
   sourcePath = path.normalize(path.resolve(sourcePath));
 
   if (sourcePath.endsWith('.js')) {
@@ -327,9 +338,7 @@ function writeTranspiledFilesCallback(fileCache: FileCache, sourcePath: string, 
     }
 
     fileCache.set(sourcePath, file);
-
   } else if (sourcePath.endsWith('.js.map')) {
-
     let file = fileCache.get(sourcePath);
     if (!file) {
       file = { content: '', path: sourcePath };
@@ -348,22 +357,16 @@ export function getTsConfig(context: BuildContext, tsConfigPath?: string): TsCon
   let config: TsConfig = null;
   tsConfigPath = tsConfigPath || getTsConfigPath(context);
 
-  const tsConfigFile = ts.readConfigFile(tsConfigPath, path => readFileSync(path, 'utf8'));
+  const tsConfigFile = ts.readConfigFile(tsConfigPath, (path) => readFileSync(path, 'utf8'));
 
   if (!tsConfigFile) {
     throw new BuildError(`tsconfig: invalid tsconfig file, "${tsConfigPath}"`);
-
   } else if (tsConfigFile.error && tsConfigFile.error.messageText) {
     throw new BuildError(`tsconfig: ${tsConfigFile.error.messageText}`);
-
   } else if (!tsConfigFile.config) {
     throw new BuildError(`tsconfig: invalid config, "${tsConfigPath}""`);
-
   } else {
-    const parsedConfig = ts.parseJsonConfigFileContent(
-      tsConfigFile.config,
-      ts.sys, context.rootDir,
-      {}, tsConfigPath);
+    const parsedConfig = ts.parseJsonConfigFileContent(tsConfigFile.config, ts.sys, context.rootDir, {}, tsConfigPath);
 
     const diagnostics = runTypeScriptDiagnostics(context, parsedConfig.errors);
 
@@ -382,7 +385,7 @@ export function getTsConfig(context: BuildContext, tsConfigPath?: string): TsCon
   return config;
 }
 
-export function transpileTsString(context: BuildContext, filePath: string, stringToTranspile: string, ) {
+export function transpileTsString(context: BuildContext, filePath: string, stringToTranspile: string) {
   if (!cachedTsConfig) {
     cachedTsConfig = getTsConfig(context);
   }
@@ -390,7 +393,7 @@ export function transpileTsString(context: BuildContext, filePath: string, strin
   const transpileOptions: ts.TranspileOptions = {
     compilerOptions: cachedTsConfig.options,
     fileName: filePath,
-    reportDiagnostics: true,
+    reportDiagnostics: true
   };
 
   transpileOptions.compilerOptions.allowJs = true;
@@ -401,9 +404,12 @@ export function transpileTsString(context: BuildContext, filePath: string, strin
 }
 
 export function transformSource(filePath: string, input: string) {
-  if (isDeepLinkingFile(filePath) ) {
+  if (isDeepLinkingFile(filePath)) {
     input = purgeDeepLinkDecorator(input);
-  } else if (filePath === getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH) && !hasExistingDeepLinkConfig(filePath, input)) {
+  } else if (
+    filePath === getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH) &&
+    !hasExistingDeepLinkConfig(filePath, input)
+  ) {
     const deepLinkString = convertDeepLinkConfigEntriesToString(getParsedDeepLinkConfig());
     input = getUpdatedAppNgModuleContentWithDeepLinkConfig(filePath, input, deepLinkString);
   }
@@ -414,7 +420,7 @@ export function copyOriginalSourceFiles(fileCache: FileCache) {
   const deepLinkFiles = filterTypescriptFilesForDeepLinks(fileCache);
   const appNgModule = fileCache.get(getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH));
   deepLinkFiles.push(appNgModule);
-  deepLinkFiles.forEach(deepLinkFile => {
+  deepLinkFiles.forEach((deepLinkFile) => {
     fileCache.set(deepLinkFile.path + inMemoryFileCopySuffix, {
       path: deepLinkFile.path + inMemoryFileCopySuffix,
       content: deepLinkFile.content
@@ -423,7 +429,7 @@ export function copyOriginalSourceFiles(fileCache: FileCache) {
 }
 
 export function resetSourceFiles(fileCache: FileCache) {
-  fileCache.getAll().forEach(file => {
+  fileCache.getAll().forEach((file) => {
     if (path.extname(file.path) === `.ts${inMemoryFileCopySuffix}`) {
       const originalExtension = changeExtension(file.path, '.ts');
       fileCache.set(originalExtension, {

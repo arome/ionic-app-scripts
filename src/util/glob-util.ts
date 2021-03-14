@@ -2,7 +2,6 @@ import { dirname, isAbsolute, join, normalize, resolve as pathResolve, sep } fro
 import * as globFunction from 'glob';
 import { toUnixPath } from './helpers';
 
-
 function isNegative(pattern: string) {
   return pattern[0] === '!';
 }
@@ -18,28 +17,33 @@ function assertPatternsInput(patterns: string[]) {
 }
 
 export function generateGlobTasks(patterns: string[], opts: any) {
-
   patterns = [].concat(patterns);
   assertPatternsInput(patterns);
 
   const globTasks: GlobObject[] = [];
 
-  opts = Object.assign({
-    cache: Object.create(null),
-    statCache: Object.create(null),
-    realpathCache: Object.create(null),
-    symlinks: Object.create(null),
-    ignore: []
-  }, opts);
+  opts = Object.assign(
+    {
+      cache: Object.create(null),
+      statCache: Object.create(null),
+      realpathCache: Object.create(null),
+      symlinks: Object.create(null),
+      ignore: []
+    },
+    opts
+  );
 
   patterns.forEach(function (pattern, i) {
     if (isNegative(pattern)) {
       return;
     }
 
-    const ignore = patterns.slice(i).filter(isNegative).map(function (pattern) {
-      return pattern.slice(1);
-    });
+    const ignore = patterns
+      .slice(i)
+      .filter(isNegative)
+      .map(function (pattern) {
+        return pattern.slice(1);
+      });
 
     const task: GlobObject = {
       pattern: pattern,
@@ -62,7 +66,7 @@ function globWrapper(task: GlobObject): Promise<GlobResult[]> {
       if (err) {
         return reject(err);
       }
-      const globResults = files.map(file => {
+      const globResults = files.map((file) => {
         return {
           absolutePath: normalize(pathResolve(file)),
           base: normalize(pathResolve(getBasePath(task.pattern)))
@@ -81,7 +85,7 @@ export function globAll(globs: string[]): Promise<GlobResult[]> {
     for (const globTask of globTasks) {
       const promise = globWrapper(globTask);
       promises.push(promise);
-      promise.then(globResult => {
+      promise.then((globResult) => {
         resultSet = resultSet.concat(globResult);
       });
     }
@@ -94,7 +98,7 @@ export function globAll(globs: string[]): Promise<GlobResult[]> {
 
 export function getBasePath(pattern: string) {
   var basePath: string;
-  const sepRe = (process.platform === 'win32' ? /[\/\\]/ : /\/+/);
+  const sepRe = process.platform === 'win32' ? /[\/\\]/ : /\/+/;
   var parent = globParent(pattern);
 
   basePath = toAbsoluteGlob(parent);
@@ -159,9 +163,7 @@ function globParent(pattern: string) {
   // remove path parts that are globby
   do {
     pattern = toUnixPath(dirname(pattern));
-  }
-
-  while (isGlob(pattern) || /(^|[^\\])([\{\[]|\([^\)]+$)/.test(pattern));
+  } while (isGlob(pattern) || /(^|[^\\])([\{\[]|\([^\)]+$)/.test(pattern));
 
   // remove escape chars and return result
   return pattern.replace(/\\([\*\?\|\[\]\(\)\{\}])/g, '$1');

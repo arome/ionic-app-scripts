@@ -5,7 +5,6 @@ import { Logger } from './logger/logger';
 import { fork, ChildProcess } from 'child_process';
 import { join } from 'path';
 
-
 export function runWorker(taskModule: string, taskWorker: string, context: BuildContext, workerConfig: any) {
   return new Promise((resolve, reject) => {
     const worker = <ChildProcess>createWorker(taskModule);
@@ -29,7 +28,7 @@ export function runWorker(taskModule: string, taskWorker: string, context: Build
         runMinifyCss: context.runMinifyCss,
         optimizeJs: context.optimizeJs,
         bundler: context.bundler,
-        inlineTemplates: context.inlineTemplates,
+        inlineTemplates: context.inlineTemplates
       },
       workerConfig
     };
@@ -37,11 +36,9 @@ export function runWorker(taskModule: string, taskWorker: string, context: Build
     worker.on('message', (msg: WorkerMessage) => {
       if (msg.error) {
         reject(new BuildError(msg.error));
-
       } else if (msg.reject) {
         const buildError = jsonToBuildError(msg.reject);
         reject(buildError);
-
       } else {
         resolve(msg.resolve);
       }
@@ -61,7 +58,6 @@ export function runWorker(taskModule: string, taskWorker: string, context: Build
   });
 }
 
-
 function killWorker(pid: number) {
   for (var i = workers.length - 1; i >= 0; i--) {
     if (workers[i].worker.pid === pid) {
@@ -76,7 +72,6 @@ function killWorker(pid: number) {
     }
   }
 }
-
 
 export function createWorker(taskModule: string): any {
   for (var i = workers.length - 1; i >= 0; i--) {
@@ -109,11 +104,9 @@ export function createWorker(taskModule: string): any {
     });
 
     return worker;
-
   } catch (e) {
     throw new BuildError(`unable to create worker-process, task: ${taskModule}: ${e}`);
   }
 }
-
 
 export const workers: WorkerProcess[] = [];

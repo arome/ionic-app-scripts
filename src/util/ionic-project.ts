@@ -7,11 +7,11 @@ export interface IonicProject {
   email: string;
   app_id: string;
   proxies: {
-    path: string,
-    proxyUrl: string,
-    proxyNoAgent: boolean,
-    rejectUnauthorized: boolean,
-    cookieRewrite: string | boolean,
+    path: string;
+    proxyUrl: string;
+    proxyNoAgent: boolean;
+    rejectUnauthorized: boolean;
+    cookieRewrite: string | boolean;
   }[];
 }
 
@@ -20,7 +20,7 @@ const readFilePromise = promisify<Buffer, string>(fs.readFile);
 export function getProjectJson(): Promise<IonicProject> {
   const projectFile = path.join(process.cwd(), 'ionic.config.json');
 
-  return readFilePromise(projectFile).then(function(textString) {
+  return readFilePromise(projectFile).then(function (textString) {
     return JSON.parse(textString.toString());
   });
 }

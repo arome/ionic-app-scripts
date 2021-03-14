@@ -9,17 +9,16 @@ import { updateIndexHtml } from './core/inject-scripts';
 import { purgeSourceMapsIfNeeded } from './util/source-maps';
 import { removeUnusedFonts } from './optimization/remove-unused-fonts';
 
-
 export function postprocess(context: BuildContext) {
   const logger = new Logger(`postprocess`);
-  return postprocessWorker(context).then(() => {
+  return postprocessWorker(context)
+    .then(() => {
       logger.finish();
     })
     .catch((err: Error) => {
       throw logger.fail(err);
     });
 }
-
 
 function postprocessWorker(context: BuildContext) {
   const promises: Promise<any>[] = [];
@@ -40,7 +39,7 @@ function postprocessWorker(context: BuildContext) {
 export function writeFilesToDisk(context: BuildContext) {
   emptyDirSync(context.tmpDir);
   const files = context.fileCache.getAll();
-  files.forEach(file => {
+  files.forEach((file) => {
     const dirName = dirname(file.path);
     const relativePath = relative(process.cwd(), dirName);
     const tmpPath = join(context.tmpDir, relativePath);

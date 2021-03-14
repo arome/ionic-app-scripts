@@ -4,8 +4,14 @@ import { getTsConfigAsync, TsConfig } from '../transpile';
 import * as Constants from '../util/constants';
 import { BuildError } from '../util/errors';
 import { GlobResult, globAll } from '../util/glob-util';
-import { getBooleanPropertyValue, getStringPropertyValue, readFileAsync, readJsonAsync, semverStringToObject } from '../util/helpers';
-import { BuildContext, } from '../util/interfaces';
+import {
+  getBooleanPropertyValue,
+  getStringPropertyValue,
+  readFileAsync,
+  readJsonAsync,
+  semverStringToObject
+} from '../util/helpers';
+import { BuildContext } from '../util/interfaces';
 
 export function scanSrcTsFiles(context: BuildContext) {
   const srcGlob = join(context.srcDir, '**', '*.ts');
@@ -16,10 +22,13 @@ export function scanSrcTsFiles(context: BuildContext) {
     globs.push(join(deepLinkDir, '**', '*.ts'));
   }
   return globAll(globs).then((results: GlobResult[]) => {
-    const promises = results.map(result => {
+    const promises = results.map((result) => {
       const promise = readFileAsync(result.absolutePath);
       promise.then((fileContent: string) => {
-        context.fileCache.set(result.absolutePath, { path: result.absolutePath, content: fileContent});
+        context.fileCache.set(result.absolutePath, {
+          path: result.absolutePath,
+          content: fileContent
+        });
       });
       return promise;
     });
@@ -27,16 +36,18 @@ export function scanSrcTsFiles(context: BuildContext) {
   });
 }
 
-
 export function validateTsConfigSettings(tsConfigFileContents: TsConfig) {
   return new Promise((resolve, reject) => {
     try {
-      const isValid = tsConfigFileContents.options &&
-        tsConfigFileContents.options.sourceMap === true;
+      const isValid = tsConfigFileContents.options && tsConfigFileContents.options.sourceMap === true;
       if (!isValid) {
-        const error = new BuildError(['The "tsconfig.json" file must have compilerOptions.sourceMap set to true.',
-          'For more information please see the default Ionic project tsconfig.json file here:',
-          'https://github.com/ionic-team/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
+        const error = new BuildError(
+          [
+            'The "tsconfig.json" file must have compilerOptions.sourceMap set to true.',
+            'For more information please see the default Ionic project tsconfig.json file here:',
+            'https://github.com/ionic-team/ionic2-app-base/blob/master/tsconfig.json'
+          ].join('\n')
+        );
         error.isFatal = true;
         return reject(error);
       }
@@ -62,9 +73,13 @@ export function validateRequiredFilesExist(context: BuildContext) {
       throw error;
     }
     if (error.code === 'ENOENT' && error.path === process.env[Constants.ENV_TS_CONFIG]) {
-      error = new BuildError([`${error.path} was not found. The "tsconfig.json" file is missing. This file is required.`,
-        'For more information please see the default Ionic project tsconfig.json file here:',
-        'https://github.com/ionic-team/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
+      error = new BuildError(
+        [
+          `${error.path} was not found. The "tsconfig.json" file is missing. This file is required.`,
+          'For more information please see the default Ionic project tsconfig.json file here:',
+          'https://github.com/ionic-team/ionic2-app-base/blob/master/tsconfig.json'
+        ].join('\n')
+      );
       error.isFatal = true;
       throw error;
     }

@@ -1,6 +1,6 @@
 import { join } from 'path';
 import * as loader from './loader-impl';
-import *  as helpers from '../util/helpers';
+import * as helpers from '../util/helpers';
 
 function getMockContext() {
   return {
@@ -10,14 +10,14 @@ function getMockContext() {
 
 function getMockFileCache() {
   return {
-    get: () => { },
-    set: () => { }
+    get: () => {},
+    set: () => {}
   };
 }
 
 function getMockWebpackObject(resourcePath: string) {
   return {
-    cacheable: () => { },
+    cacheable: () => {},
     async: () => {},
     resourcePath: resourcePath
   };
@@ -27,7 +27,7 @@ describe('webpack loader', () => {
   it('should callback with file and original source map provided', (done: Function) => {
     // arrange
     const mockContext = getMockContext();
-    const mockSourceMap = { };
+    const mockSourceMap = {};
     const sourceString = 'sourceString';
     const fakePath = join(process.cwd(), 'some', 'path', 'content.js');
     const fakeContent = 'SomeFileContent';
@@ -60,7 +60,7 @@ describe('webpack loader', () => {
     // arrange
     const mockContext = getMockContext();
 
-    const mockSourceMap = { };
+    const mockSourceMap = {};
     const sourceString = 'sourceString';
     const fakePath = join(process.cwd(), 'some', 'path', 'content.js');
     const fakeContent = `{"test": "test"}`;
@@ -93,12 +93,11 @@ describe('webpack loader', () => {
     };
   });
 
-
-  it('should callback with error when can\'t load file from disk', (done: Function) => {
+  it("should callback with error when can't load file from disk", (done: Function) => {
     // arrange
     const cantReadFileError = 'Failed to read file from disk';
     const mockContext = getMockContext();
-    const mockSourceMap = { };
+    const mockSourceMap = {};
     const sourceString = 'sourceString';
     const fakePath = join(process.cwd(), 'some', 'path', 'content.js');
     const mockWebpackObject = getMockWebpackObject(fakePath);
@@ -127,7 +126,7 @@ describe('webpack loader', () => {
   it('should callback with content from disk', (done: Function) => {
     // arrange
     const mockContext = getMockContext();
-    const mockSourceMap = { };
+    const mockSourceMap = {};
     const sourceString = 'sourceString';
     const fakePath = join(process.cwd(), 'some', 'path', 'content.js');
     const fakeContent = `{"test": "test"}`;

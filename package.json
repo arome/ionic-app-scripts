@@ -19,6 +19,7 @@
   "scripts": {
     "build": "npm run clean && tsc && npm run sass",
     "build-and-test": "jest",
+    "prettier": "prettier --write ./",
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "clean": "rimraf ./dist",
     "github-release": "node ./scripts/create-github-release.js",
@@ -87,6 +88,7 @@
     "ionic-cz-conventional-changelog": "^1.0.0",
     "jest": "^21.2.1",
     "mock-fs": "^4.4.2",
+    "prettier": "^2.2.1",
     "rewire": "^2.5.2",
     "rimraf": "^2.6.1",
     "rxjs": "^5.5.10",

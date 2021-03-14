@@ -4,15 +4,13 @@ import { FileCache } from './file-cache';
 import { VirtualDirStats, VirtualFileStats } from './virtual-file-utils';
 
 export class HybridFileSystem implements FileSystem, VirtualFileSystem {
-
   private filesStats: { [filePath: string]: VirtualFileStats } = {};
   private directoryStats: { [filePath: string]: VirtualDirStats } = {};
   private inputFileSystem: FileSystem;
   private outputFileSystem: FileSystem;
   private writeToDisk: boolean;
 
-  constructor(private fileCache: FileCache) {
-  }
+  constructor(private fileCache: FileCache) {}
 
   setInputFileSystem(fs: FileSystem) {
     this.inputFileSystem = fs;
@@ -99,19 +97,21 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
 
   getSubDirs(directoryPath: string): string[] {
     return Object.keys(this.directoryStats)
-      .filter(filePath => dirname(filePath) === directoryPath)
-      .map(filePath => basename(directoryPath));
+      .filter((filePath) => dirname(filePath) === directoryPath)
+      .map((filePath) => basename(directoryPath));
   }
 
   getFileNamesInDirectory(directoryPath: string): string[] {
-    return Object.keys(this.filesStats).filter(filePath => dirname(filePath) === directoryPath).map(filePath => basename(filePath));
+    return Object.keys(this.filesStats)
+      .filter((filePath) => dirname(filePath) === directoryPath)
+      .map((filePath) => basename(filePath));
   }
 
   getAllFileStats(): { [filePath: string]: VirtualFileStats } {
     return this.filesStats;
   }
 
-  getAllDirStats():  { [filePath: string]: VirtualDirStats } {
+  getAllDirStats(): { [filePath: string]: VirtualDirStats } {
     return this.directoryStats;
   }
 

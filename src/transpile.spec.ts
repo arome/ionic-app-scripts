@@ -11,9 +11,12 @@ describe('transpile', () => {
       };
 
       const aboutFilePath = 'about.ts';
-      const aboutFile = { path: aboutFilePath, content: 'modifiedContent'};
+      const aboutFile = { path: aboutFilePath, content: 'modifiedContent' };
       const originalAboutFilePath = aboutFilePath + transpile.inMemoryFileCopySuffix;
-      const originalAboutFile = { path: originalAboutFilePath, content: 'originalContent'};
+      const originalAboutFile = {
+        path: originalAboutFilePath,
+        content: 'originalContent'
+      };
       context.fileCache.set(aboutFilePath, aboutFile);
       context.fileCache.set(originalAboutFilePath, originalAboutFile);
 

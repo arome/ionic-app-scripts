@@ -1,5 +1,12 @@
 import { normalize } from 'path';
-import { CancellationToken, CompilerHost, CompilerOptions, createCompilerHost, ScriptTarget, SourceFile } from 'typescript';
+import {
+  CancellationToken,
+  CompilerHost,
+  CompilerOptions,
+  createCompilerHost,
+  ScriptTarget,
+  SourceFile
+} from 'typescript';
 import { VirtualFileSystem } from '../util/interfaces';
 import { getTypescriptSourceFile } from '../util/typescript-utils';
 import { Logger } from '../logger/logger';
@@ -65,7 +72,12 @@ export class FileSystemCompilerHost implements CompilerHost {
     // we haven't created a source file for this yet, so try to use what's in memory
     const fileContentFromMemory = this.fileSystem.getFileContent(filePath);
     if (fileContentFromMemory) {
-      const typescriptSourceFile = getTypescriptSourceFile(filePath, fileContentFromMemory, languageVersion, this.setParentNodes);
+      const typescriptSourceFile = getTypescriptSourceFile(
+        filePath,
+        fileContentFromMemory,
+        languageVersion,
+        this.setParentNodes
+      );
       return typescriptSourceFile;
     }
     const diskSourceFile = this.diskCompilerHost.getSourceFile(filePath, languageVersion, onError);

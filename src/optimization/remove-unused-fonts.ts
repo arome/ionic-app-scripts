@@ -5,7 +5,6 @@ import * as Constants from '../util/constants';
 import { getStringPropertyValue, readDirAsync, unlinkAsync } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
 
-
 // For webapps, we pretty much need all fonts to be available because
 // the web server deployment never knows which browser/platform is
 // opening the app. Additionally, webapps will request fonts on-demand,
@@ -29,8 +28,8 @@ export function removeUnusedFonts(context: BuildContext): Promise<any> {
   return readDirAsync(fontDir).then((fileNames: string[]) => {
     fileNames = fileNames.sort();
     const toPurge = getFontFileNamesToPurge(context.target, context.platform, fileNames);
-    const fullPaths = toPurge.map(fileName => join(fontDir, fileName));
-    const promises = fullPaths.map(fullPath => unlinkAsync(fullPath));
+    const fullPaths = toPurge.map((fileName) => join(fontDir, fileName));
+    const promises = fullPaths.map((fullPath) => unlinkAsync(fullPath));
     return Promise.all(promises);
   });
 }
@@ -43,17 +42,24 @@ export function getFontFileNamesToPurge(target: string, platform: string, fileNa
   for (const fileName of fileNames) {
     if (platform === 'android') {
       // remove noto-sans, roboto, and non-woff ionicons
-      if (fileName.startsWith('noto-sans') || fileName.startsWith('roboto') || (isIonicons(fileName) && !isWoof(fileName))) {
+      if (
+        fileName.startsWith('noto-sans') ||
+        fileName.startsWith('roboto') ||
+        (isIonicons(fileName) && !isWoof(fileName))
+      ) {
         filesToDelete.add(fileName);
       }
     } else if (platform === 'ios') {
       // remove noto-sans, non-woff ionicons
-      if (fileName.startsWith('noto-sans') || (fileName.startsWith('roboto') && !isWoof(fileName)) || (isIonicons(fileName) && !isWoof(fileName))) {
+      if (
+        fileName.startsWith('noto-sans') ||
+        (fileName.startsWith('roboto') && !isWoof(fileName)) ||
+        (isIonicons(fileName) && !isWoof(fileName))
+      ) {
         filesToDelete.add(fileName);
       }
     }
     // for now don't bother deleting anything for windows, need to get some info first
-
   }
   return Array.from(filesToDelete);
 }

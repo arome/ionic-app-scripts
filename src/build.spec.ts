@@ -22,14 +22,16 @@ describe('build', () => {
     spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve());
     spyOn(transpile, transpile.getTsConfigAsync.name).and.callFake(() => {
       return Promise.resolve({
-        'options': {
-          'sourceMap': true
+        options: {
+          sourceMap: true
         }
       });
     });
 
     spyOn(buildUtils, buildUtils.scanSrcTsFiles.name).and.returnValue(Promise.resolve());
-    spyOn(buildUtils, buildUtils.validateRequiredFilesExist.name).and.returnValue(Promise.resolve(['fileOneContent', 'fileTwoContent']));
+    spyOn(buildUtils, buildUtils.validateRequiredFilesExist.name).and.returnValue(
+      Promise.resolve(['fileOneContent', 'fileTwoContent'])
+    );
     spyOn(buildUtils, buildUtils.validateTsConfigSettings.name).and.returnValue(Promise.resolve());
     spyOn(buildUtils, buildUtils.readVersionOfDependencies.name).and.returnValue(Promise.resolve());
     spyOn(bundle, bundle.bundle.name).and.returnValue(Promise.resolve());

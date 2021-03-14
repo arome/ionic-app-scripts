@@ -9,9 +9,14 @@ import {
   purgeDeepLinkDecorator
 } from './deep-linking/util';
 import { Logger } from './logger/logger';
-import { getUserConfigFile} from './util/config';
+import { getUserConfigFile } from './util/config';
 import * as Constants from './util/constants';
-import { changeExtension, getBooleanPropertyValue, getParsedDeepLinkConfig, getStringPropertyValue } from './util/helpers';
+import {
+  changeExtension,
+  getBooleanPropertyValue,
+  getParsedDeepLinkConfig,
+  getStringPropertyValue
+} from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 
 export function ngc(context: BuildContext, configFile?: string) {
@@ -23,7 +28,7 @@ export function ngc(context: BuildContext, configFile?: string) {
     .then(() => {
       logger.finish();
     })
-    .catch(err => {
+    .catch((err) => {
       throw logger.fail(err);
     });
 }
@@ -35,7 +40,8 @@ export function ngcWorker(context: BuildContext, configFile: string): Promise<an
 }
 
 export function runNgc(context: BuildContext, configFile: string): Promise<any> {
-  return runAot(context, { entryPoint: process.env[Constants.ENV_APP_ENTRY_POINT],
+  return runAot(context, {
+    entryPoint: process.env[Constants.ENV_APP_ENTRY_POINT],
     rootDir: context.rootDir,
     tsConfigPath: process.env[Constants.ENV_TS_CONFIG],
     appNgModuleClass: process.env[Constants.ENV_APP_NG_MODULE_CLASS],
@@ -46,7 +52,7 @@ export function runNgc(context: BuildContext, configFile: string): Promise<any> 
 export function transformTsForDeepLinking(context: BuildContext) {
   if (getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS)) {
     const tsFiles = filterTypescriptFilesForDeepLinks(context.fileCache);
-    tsFiles.forEach(tsFile => {
+    tsFiles.forEach((tsFile) => {
       tsFile.content = purgeDeepLinkDecorator(tsFile.content);
     });
     const tsFile = context.fileCache.get(getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH));

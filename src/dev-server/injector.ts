@@ -1,10 +1,14 @@
 import { getAppScriptsVersion, getSystemText } from '../util/helpers';
 import { LOGGER_DIR } from './serve-config';
 
-
 const LOGGER_HEADER = '<!-- Ionic Dev Server: Injected Logger Script -->';
 
-export function injectNotificationScript(rootDir: string, content: any, notifyOnConsoleLog: boolean, notificationPort: Number): any {
+export function injectNotificationScript(
+  rootDir: string,
+  content: any,
+  notifyOnConsoleLog: boolean,
+  notificationPort: Number
+): any {
   let contentStr = content.toString();
   const consoleLogScript = getDevLoggerScript(rootDir, notifyOnConsoleLog, notificationPort);
 

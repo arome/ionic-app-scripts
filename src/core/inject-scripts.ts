@@ -3,11 +3,10 @@ import { buildIonicGlobal } from './ionic-global';
 import { readFileAsync, writeFileAsync } from '../util/helpers';
 import { join } from 'path';
 
-
 export function updateIndexHtml(context: BuildContext) {
   const indexPath = join(context.wwwDir, context.wwwIndex);
 
-  return readFileAsync(indexPath).then(indexHtml => {
+  return readFileAsync(indexPath).then((indexHtml) => {
     if (!indexHtml) {
       return Promise.resolve(null);
     }
@@ -17,7 +16,6 @@ export function updateIndexHtml(context: BuildContext) {
     return writeFileAsync(indexPath, indexHtml);
   });
 }
-
 
 export function injectCoreScripts(context: BuildContext, indexHtml: string) {
   const inject = [];
@@ -30,7 +28,6 @@ export function injectCoreScripts(context: BuildContext, indexHtml: string) {
 
   return injectCoreHtml(indexHtml, inject.join('\n'));
 }
-
 
 export function injectCoreHtml(indexHtml: string, inject: string) {
   // see if we can find an existing ionic script tag and replace it entirely

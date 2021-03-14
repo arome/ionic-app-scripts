@@ -1,7 +1,6 @@
 import { BuildContext } from './util/interfaces';
 import { transpileWorker, TranspileWorkerMessage, TranspileWorkerConfig } from './transpile';
 
-
 const context: BuildContext = {};
 
 process.on('message', (incomingMsg: TranspileWorkerMessage) => {
@@ -30,5 +29,4 @@ process.on('message', (incomingMsg: TranspileWorkerMessage) => {
       };
       process.send(outgoingMsg);
     });
-
 });

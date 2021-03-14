@@ -1,7 +1,7 @@
 import { join } from 'path';
 import * as Constants from '../util/constants';
 import { changeExtension, getParsedDeepLinkConfig, getStringPropertyValue } from '../util/helpers';
-import { BuildContext , DeepLinkConfigEntry} from '../util/interfaces';
+import { BuildContext, DeepLinkConfigEntry } from '../util/interfaces';
 import { Logger } from '../logger/logger';
 import { getInstance } from '../util/hybrid-file-system-factory';
 import { WatchMemorySystem } from './watch-memory-system';
@@ -9,11 +9,9 @@ import { WatchMemorySystem } from './watch-memory-system';
 const ContextElementDependency = require('webpack/lib/dependencies/ContextElementDependency');
 
 export class IonicEnvironmentPlugin {
-  constructor(private context: BuildContext, private writeToDisk: boolean) {
-  }
+  constructor(private context: BuildContext, private writeToDisk: boolean) {}
 
   apply(compiler: any) {
-
     compiler.plugin('context-module-factory', (contextModuleFactory: any) => {
       contextModuleFactory.plugin('after-resolve', (result: any, callback: Function) => {
         if (!result) {
@@ -30,16 +28,17 @@ export class IonicEnvironmentPlugin {
 
         result.resource = this.context.srcDir;
         result.recursive = true;
-        result.dependencies.forEach((dependency: any) => dependency.critical = false);
-        result.resolveDependencies = (p1: any, p2: any, p3: any, p4: RegExp, cb: any ) => {
+        result.dependencies.forEach((dependency: any) => (dependency.critical = false));
+        result.resolveDependencies = (p1: any, p2: any, p3: any, p4: RegExp, cb: any) => {
           const dependencies = Object.keys(webpackDeepLinkModuleDictionary)
-                                  .map((key) => {
-                                    const value = webpackDeepLinkModuleDictionary[key];
-                                    if (value) {
-                                      return new ContextElementDependency(value, key);
-                                    }
-                                    return null;
-                                  }).filter(dependency => !!dependency);
+            .map((key) => {
+              const value = webpackDeepLinkModuleDictionary[key];
+              if (value) {
+                return new ContextElementDependency(value, key);
+              }
+              return null;
+            })
+            .filter((dependency) => !!dependency);
           cb(null, dependencies);
         };
         return callback(null, result);
@@ -65,7 +64,7 @@ export class IonicEnvironmentPlugin {
       this.initializeWebpackFileSystemCaches(webpackFileSystem);
 
       for (const filePath of Object.keys(fileStatsDictionary)) {
-        const stats =  fileStatsDictionary[filePath];
+        const stats = fileStatsDictionary[filePath];
         webpackFileSystem._statStorage.data[filePath] = [null, stats];
         webpackFileSystem._readFileStorage.data[filePath] = [null, stats.content];
       }
@@ -82,21 +81,21 @@ export class IonicEnvironmentPlugin {
 
   private initializeWebpackFileSystemCaches(webpackFileSystem: any) {
     if (!webpackFileSystem._statStorage) {
-      webpackFileSystem._statStorage = { };
+      webpackFileSystem._statStorage = {};
     }
     if (!webpackFileSystem._statStorage.data) {
       webpackFileSystem._statStorage.data = [];
     }
 
     if (!webpackFileSystem._readFileStorage) {
-      webpackFileSystem._readFileStorage = { };
+      webpackFileSystem._readFileStorage = {};
     }
     if (!webpackFileSystem._readFileStorage.data) {
       webpackFileSystem._readFileStorage.data = [];
     }
 
     if (!webpackFileSystem._readdirStorage) {
-      webpackFileSystem._readdirStorage = { };
+      webpackFileSystem._readdirStorage = {};
     }
     if (!webpackFileSystem._readdirStorage.data) {
       webpackFileSystem._readdirStorage.data = [];
@@ -104,13 +103,12 @@ export class IonicEnvironmentPlugin {
   }
 }
 
-
 export function convertDeepLinkConfigToWebpackFormat(parsedDeepLinkConfigs: Map<string, DeepLinkConfigEntry>) {
-  const dictionary: { [index: string]: string} = { };
+  const dictionary: { [index: string]: string } = {};
   if (!parsedDeepLinkConfigs) {
     parsedDeepLinkConfigs = new Map<string, DeepLinkConfigEntry>();
   }
-  parsedDeepLinkConfigs.forEach(parsedDeepLinkConfig => {
+  parsedDeepLinkConfigs.forEach((parsedDeepLinkConfig) => {
     if (parsedDeepLinkConfig.userlandModulePath && parsedDeepLinkConfig.absolutePath) {
       dictionary[parsedDeepLinkConfig.userlandModulePath] = parsedDeepLinkConfig.absolutePath;
     }

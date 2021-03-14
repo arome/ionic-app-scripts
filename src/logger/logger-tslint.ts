@@ -3,20 +3,41 @@ import { splitLineBreaks } from '../util/helpers';
 import { BuildContext, Diagnostic, PrintLine } from '../util/interfaces';
 import { Logger } from './logger';
 
-
-const STOP_CHARS = [' ', '=', ',', '.', '\t', '{', '}', '(', ')', '"', '\'', '`', '?', ':', ';', '+', '-', '*', '/', '<', '>', '&', '[', ']', '|'];
-
+const STOP_CHARS = [
+  ' ',
+  '=',
+  ',',
+  '.',
+  '\t',
+  '{',
+  '}',
+  '(',
+  ')',
+  '"',
+  "'",
+  '`',
+  '?',
+  ':',
+  ';',
+  '+',
+  '-',
+  '*',
+  '/',
+  '<',
+  '>',
+  '&',
+  '[',
+  ']',
+  '|'
+];
 
 export function runTsLintDiagnostics(context: BuildContext, failures: RuleFailure[]) {
-  return failures.map(failure => loadDiagnostic(context, failure));
+  return failures.map((failure) => loadDiagnostic(context, failure));
 }
 
-
 export function loadDiagnostic(context: BuildContext, failure: RuleFailure) {
-  const start: IRuleFailurePositionJson = failure.getStartPosition()
-    .toJson();
-  const end: IRuleFailurePositionJson = failure.getEndPosition()
-    .toJson();
+  const start: IRuleFailurePositionJson = failure.getStartPosition().toJson();
+  const end: IRuleFailurePositionJson = failure.getEndPosition().toJson();
   const fileName = failure.getFileName();
   const sourceFile = failure.getRawLines();
 
@@ -42,8 +63,8 @@ export function loadDiagnostic(context: BuildContext, failure: RuleFailure) {
           lineNumber: i + 1,
           text: srcLines[i],
           html: srcLines[i],
-          errorCharStart: (i === start.line) ? start.character : (i === end.line) ? end.character : -1,
-          errorLength: 0,
+          errorCharStart: i === start.line ? start.character : i === end.line ? end.character : -1,
+          errorLength: 0
         };
         for (let j = errorLine.errorCharStart; j < errorLine.text.length; j++) {
           if (STOP_CHARS.indexOf(errorLine.text.charAt(j)) > -1) {

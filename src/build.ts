@@ -7,7 +7,6 @@ import {
   validateTsConfigSettings
 } from './build/util';
 
-
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
@@ -30,15 +29,17 @@ import { BuildContext, BuildState, BuildUpdateMessage, ChangedFile } from './uti
 
 export function build(context: BuildContext) {
   setContext(context);
-  const logger = new Logger(`build ${(context.isProd ? 'prod' : 'dev')}`);
+  const logger = new Logger(`build ${context.isProd ? 'prod' : 'dev'}`);
 
   return buildWorker(context)
     .then(() => {
       // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
       logger.finish();
     })
-    .catch(err => {
-      if (err.isFatal) { throw err; }
+    .catch((err) => {
+      if (err.isFatal) {
+        throw err;
+      }
       throw logger.fail(err);
     });
 }
@@ -51,7 +52,6 @@ async function buildWorker(context: BuildContext) {
   const tsConfigContents = results[0][1];
   await validateTsConfigSettings(tsConfigContents);
   await buildProject(context);
-
 }
 
 function buildProject(context: BuildContext) {
@@ -69,7 +69,7 @@ function buildProject(context: BuildContext) {
       }
     })
     .then(() => {
-      const compilePromise = (context.runAot) ? ngc(context) : transpile(context);
+      const compilePromise = context.runAot ? ngc(context) : transpile(context);
       return compilePromise;
     })
     .then(() => {
@@ -79,17 +79,12 @@ function buildProject(context: BuildContext) {
       return bundle(context);
     })
     .then(() => {
-      const minPromise = (context.runMinifyJs) ? minifyJs(context) : Promise.resolve();
-      const sassPromise = sass(context)
-        .then(() => {
-          return (context.runMinifyCss) ? minifyCss(context) : Promise.resolve();
-        });
+      const minPromise = context.runMinifyJs ? minifyJs(context) : Promise.resolve();
+      const sassPromise = sass(context).then(() => {
+        return context.runMinifyCss ? minifyCss(context) : Promise.resolve();
+      });
 
-      return Promise.all([
-        minPromise,
-        sassPromise,
-        copyPromise
-      ]);
+      return Promise.all([minPromise, sassPromise, copyPromise]);
     })
     .then(() => {
       return postprocess(context);
@@ -104,13 +99,13 @@ function buildProject(context: BuildContext) {
         }
       }
     })
-    .catch(err => {
+    .catch((err) => {
       throw new BuildError(err);
     });
 }
 
 export function buildUpdate(changedFiles: ChangedFile[], context: BuildContext) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const logger = new Logger('build');
 
     buildId++;
@@ -173,14 +168,12 @@ export function buildUpdate(changedFiles: ChangedFile[], context: BuildContext) 
     const parallelTasksPromise = buildUpdateParallelTasks(changedFiles, context);
 
     // whether it was resolved or rejected, we need to do the same thing
-    buildTasksPromise
-      .then(buildTasksDone)
-      .catch(() => {
-        buildTasksDone({
-          requiresAppReload: false,
-          changedFiles: changedFiles
-        });
+    buildTasksPromise.then(buildTasksDone).catch(() => {
+      buildTasksDone({
+        requiresAppReload: false,
+        changedFiles: changedFiles
       });
+    });
   });
 }
 
@@ -209,7 +202,6 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
       }
       // no template updates required
       return Promise.resolve();
-
     })
     .then(() => {
       // TRANSPILE
@@ -219,7 +211,6 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
         // not that we've also already started a transpile diagnostics only
         // build that only needs to be completed by the end of buildUpdate
         return transpileUpdate(changedFiles, context);
-
       } else if (context.transpileState === BuildState.RequiresBuild) {
         // run the whole transpile
         resolveValue.requiresAppReload = true;
@@ -227,7 +218,6 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
       }
       // no transpiling required
       return Promise.resolve();
-
     })
     .then(() => {
       // PREPROCESS
@@ -239,7 +229,6 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
         // we need to do a bundle update
         resolveValue.requiresAppReload = true;
         return bundleUpdate(changedFiles, context);
-
       } else if (context.bundleState === BuildState.RequiresBuild) {
         // we need to do a full bundle build
         resolveValue.requiresAppReload = true;
@@ -247,34 +236,38 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
       }
       // no bundling required
       return Promise.resolve();
-
     })
     .then(() => {
       // SASS
       if (context.sassState === BuildState.RequiresUpdate) {
         // we need to do a sass update
-        return sassUpdate(changedFiles, context).then(outputCssFile => {
+        return sassUpdate(changedFiles, context).then((outputCssFile) => {
           const changedFile: ChangedFile = {
             event: Constants.FILE_CHANGE_EVENT,
             ext: '.css',
             filePath: outputCssFile
           };
 
-          context.fileCache.set(outputCssFile, { path: outputCssFile, content: outputCssFile });
+          context.fileCache.set(outputCssFile, {
+            path: outputCssFile,
+            content: outputCssFile
+          });
 
           resolveValue.changedFiles.push(changedFile);
         });
-
       } else if (context.sassState === BuildState.RequiresBuild) {
         // we need to do a full sass build
-        return sass(context).then(outputCssFile => {
+        return sass(context).then((outputCssFile) => {
           const changedFile: ChangedFile = {
             event: Constants.FILE_CHANGE_EVENT,
             ext: '.css',
             filePath: outputCssFile
           };
 
-          context.fileCache.set(outputCssFile, { path: outputCssFile, content: outputCssFile });
+          context.fileCache.set(outputCssFile, {
+            path: outputCssFile,
+            content: outputCssFile
+          });
 
           resolveValue.changedFiles.push(changedFile);
         });
@@ -299,7 +292,10 @@ function loadFiles(changedFiles: ChangedFile[], context: BuildContext) {
       const promise = readFileAsync(changedFile.filePath);
       promises.push(promise);
       promise.then((content: string) => {
-        context.fileCache.set(changedFile.filePath, { path: changedFile.filePath, content: content });
+        context.fileCache.set(changedFile.filePath, {
+          path: changedFile.filePath,
+          content: content
+        });
       });
     }
   }

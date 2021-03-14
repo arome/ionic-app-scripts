@@ -1,7 +1,11 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 
-import { generateDefaultDeepLinkNgModuleContent, getDeepLinkDecoratorContentForSourceFile, getNgModulePathFromCorrespondingPage } from '../deep-linking/util';
+import {
+  generateDefaultDeepLinkNgModuleContent,
+  getDeepLinkDecoratorContentForSourceFile,
+  getNgModulePathFromCorrespondingPage
+} from '../deep-linking/util';
 import { generateContext } from '../util/config';
 import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
@@ -14,15 +18,18 @@ import { getTypescriptSourceFile } from '../util/typescript-utils';
 export function getTsFilePaths(context: BuildContext) {
   const tsFileGlobString = join(context.srcDir, '**', '*.ts');
   return globAll([tsFileGlobString]).then((results: GlobResult[]) => {
-    return results.map(result => result.absolutePath);
+    return results.map((result) => result.absolutePath);
   });
 }
 
 export function readTsFiles(context: BuildContext, tsFilePaths: string[]) {
-  const promises = tsFilePaths.map(tsFilePath => {
+  const promises = tsFilePaths.map((tsFilePath) => {
     const promise = readFileAsync(tsFilePath);
     promise.then((fileContent: string) => {
-      context.fileCache.set(tsFilePath, { path: tsFilePath, content: fileContent});
+      context.fileCache.set(tsFilePath, {
+        path: tsFilePath,
+        content: fileContent
+      });
     });
     return promise;
   });
@@ -30,7 +37,7 @@ export function readTsFiles(context: BuildContext, tsFilePaths: string[]) {
 }
 
 export function generateAndWriteNgModules(fileCache: FileCache) {
-  fileCache.getAll().forEach(file => {
+  fileCache.getAll().forEach((file) => {
     const sourceFile = getTypescriptSourceFile(file.path, file.content);
     const deepLinkDecoratorData = getDeepLinkDecoratorContentForSourceFile(sourceFile);
     if (deepLinkDecoratorData) {
@@ -39,8 +46,14 @@ export function generateAndWriteNgModules(fileCache: FileCache) {
       const ngModuleFile = fileCache.get(correspondingNgModulePath);
       if (!ngModuleFile) {
         // the ngModule file does not exist, so go ahead and create a default one
-        const defaultNgModuleContent = generateDefaultDeepLinkNgModuleContent(file.path, deepLinkDecoratorData.className);
-        const ngModuleFilePath = changeExtension(file.path, getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX));
+        const defaultNgModuleContent = generateDefaultDeepLinkNgModuleContent(
+          file.path,
+          deepLinkDecoratorData.className
+        );
+        const ngModuleFilePath = changeExtension(
+          file.path,
+          getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX)
+        );
         writeFileSync(ngModuleFilePath, defaultNgModuleContent);
       }
     }
@@ -51,12 +64,14 @@ function run() {
   const context = generateContext();
 
   // find out what files to read
-  return getTsFilePaths(context).then((filePaths: string[]) => {
-    // read the files
-    return readTsFiles(context, filePaths);
-  }).then(() => {
-    generateAndWriteNgModules(context.fileCache);
-  });
+  return getTsFilePaths(context)
+    .then((filePaths: string[]) => {
+      // read the files
+      return readTsFiles(context, filePaths);
+    })
+    .then(() => {
+      generateAndWriteNgModules(context.fileCache);
+    });
 }
 
 run();

@@ -2,7 +2,6 @@ import { BuildError, IgnorableError } from '../util/errors';
 import { isDebugMode } from '../util/config';
 import * as chalk from 'chalk';
 
-
 export class Logger {
   private start: number;
   private scope: string;
@@ -31,9 +30,8 @@ export class Logger {
 
     if (duration > 1000) {
       time = 'in ' + (duration / 1000).toFixed(2) + ' s';
-
     } else {
-      let ms = parseFloat((duration).toFixed(3));
+      let ms = parseFloat(duration.toFixed(3));
       if (ms > 0) {
         time = 'in ' + duration + ' ms';
       } else {
@@ -78,7 +76,6 @@ export class Logger {
           if (err.stack && isDebugMode()) {
             Logger.debug(err.stack);
           }
-
         } else if (isDebugMode()) {
           Logger.debug(`${failedMsg}`);
         }
@@ -98,7 +95,7 @@ export class Logger {
    * with whitespace so the message is lined up with timestamped logs.
    */
   static log(...msg: any[]) {
-    Logger.wordWrap(msg).forEach(line => {
+    Logger.wordWrap(msg).forEach((line) => {
       console.log(line);
     });
   }
@@ -142,7 +139,7 @@ export class Logger {
       let prefix = timePrefix();
       lines[0] = prefix + lines[0].substr(prefix.length);
     }
-    lines.forEach(line => {
+    lines.forEach((line) => {
       console.warn(chalk.yellow(line));
     });
   }
@@ -159,7 +156,7 @@ export class Logger {
         lines[0] += memoryUsage();
       }
     }
-    lines.forEach(line => {
+    lines.forEach((line) => {
       console.error(chalk.red(line));
     });
   }
@@ -184,7 +181,7 @@ export class Logger {
         let prefix = '[ DEBUG! ]';
         lines[0] = prefix + lines[0].substr(prefix.length);
       }
-      lines.forEach(line => {
+      lines.forEach((line) => {
         console.log(chalk.cyan(line));
       });
     }
@@ -194,50 +191,44 @@ export class Logger {
     const output: string[] = [];
 
     const words: any[] = [];
-    msg.forEach(m => {
+    msg.forEach((m) => {
       if (m === null) {
         words.push('null');
-
       } else if (typeof m === 'undefined') {
         words.push('undefined');
-
       } else if (typeof m === 'string') {
-        m.replace(/\s/gm, ' ').split(' ').forEach(strWord => {
-          if (strWord.trim().length) {
-            words.push(strWord.trim());
-          }
-        });
-
+        m.replace(/\s/gm, ' ')
+          .split(' ')
+          .forEach((strWord) => {
+            if (strWord.trim().length) {
+              words.push(strWord.trim());
+            }
+          });
       } else if (typeof m === 'number' || typeof m === 'boolean') {
         words.push(m.toString());
-
       } else if (typeof m === 'function') {
         words.push(m.toString());
-
       } else if (Array.isArray(m)) {
         words.push(() => {
           return m.toString();
         });
-
       } else if (Object(m) === m) {
         words.push(() => {
           return m.toString();
         });
-
       } else {
         words.push(m.toString());
       }
     });
 
     let line = Logger.INDENT;
-    words.forEach(word => {
+    words.forEach((word) => {
       if (typeof word === 'function') {
         if (line.trim().length) {
           output.push(line);
         }
         output.push(word());
         line = Logger.INDENT;
-
       } else if (Logger.INDENT.length + word.length > Logger.MAX_LEN) {
         // word is too long to play nice, just give it its own line
         if (line.trim().length) {
@@ -245,13 +236,11 @@ export class Logger {
         }
         output.push(Logger.INDENT + word);
         line = Logger.INDENT;
-
-      } else if ((word.length + line.length) > Logger.MAX_LEN) {
+      } else if (word.length + line.length > Logger.MAX_LEN) {
         // this word would make the line too long
         // print the line now, then start a new one
         output.push(line);
         line = Logger.INDENT + word + ' ';
-
       } else {
         line += word + ' ';
       }
@@ -261,7 +250,6 @@ export class Logger {
     }
     return output;
   }
-
 
   static formatFileName(rootDir: string, fileName: string) {
     fileName = fileName.replace(rootDir, '');
@@ -274,8 +262,13 @@ export class Logger {
     return fileName;
   }
 
-
-  static formatHeader(type: string, fileName: string, rootDir: string, startLineNumber: number = null, endLineNumber: number = null) {
+  static formatHeader(
+    type: string,
+    fileName: string,
+    rootDir: string,
+    startLineNumber: number = null,
+    endLineNumber: number = null
+  ) {
     let header = `${type}: ${Logger.formatFileName(rootDir, fileName)}`;
 
     if (startLineNumber !== null && startLineNumber > 0) {
@@ -289,22 +282,26 @@ export class Logger {
     return header;
   }
 
-
   static newLine() {
     console.log('');
   }
 
   static INDENT = '            ';
   static MAX_LEN = 120;
-
 }
-
 
 function timePrefix() {
   const date = new Date();
-  return '[' + ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2) + ']';
+  return (
+    '[' +
+    ('0' + date.getHours()).slice(-2) +
+    ':' +
+    ('0' + date.getMinutes()).slice(-2) +
+    ':' +
+    ('0' + date.getSeconds()).slice(-2) +
+    ']'
+  );
 }
-
 
 function memoryUsage() {
   return chalk.dim(` MEM: ${(process.memoryUsage().rss / 1000000).toFixed(1)}MB`);

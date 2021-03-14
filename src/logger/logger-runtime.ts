@@ -3,10 +3,14 @@ import { escapeHtml, splitLineBreaks } from '../util/helpers';
 import { generateCodeBlock, getDiagnosticsHtmlContent } from './logger-diagnostics';
 import { highlight } from '../highlight/highlight';
 import { readFileSync } from 'fs';
-import { resolve , normalize} from 'path';
+import { resolve, normalize } from 'path';
 
-
-export function generateRuntimeDiagnosticContent(rootDir: string, buildDir: string, runtimeErrorMessage: string, runtimeErrorStack: string) {
+export function generateRuntimeDiagnosticContent(
+  rootDir: string,
+  buildDir: string,
+  runtimeErrorMessage: string,
+  runtimeErrorStack: string
+) {
   let c: string[] = [];
 
   c.push(`<div class="ion-diagnostic">`);
@@ -22,7 +26,7 @@ export function generateRuntimeDiagnosticContent(rootDir: string, buildDir: stri
   c.push(`</div>`); // .ion-diagnostic-masthead
 
   const diagnosticsHtmlCache = generateRuntimeStackDiagnostics(rootDir, runtimeErrorStack);
-  diagnosticsHtmlCache.forEach(d => {
+  diagnosticsHtmlCache.forEach((d) => {
     c.push(generateCodeBlock(d));
   });
 
@@ -36,12 +40,11 @@ export function generateRuntimeDiagnosticContent(rootDir: string, buildDir: stri
   return getDiagnosticsHtmlContent(buildDir, c.join('\n'));
 }
 
-
 export function generateRuntimeStackDiagnostics(rootDir: string, stack: string) {
   const diagnostics: Diagnostic[] = [];
 
   if (stack) {
-    splitLineBreaks(stack).forEach(stackLine => {
+    splitLineBreaks(stack).forEach((stackLine) => {
       try {
         const match = WEBPACK_FILE_REGEX.exec(stackLine);
         if (!match) return;
@@ -136,7 +139,6 @@ export function generateRuntimeStackDiagnostics(rootDir: string, stack: string) 
         }
 
         diagnostics.push(d);
-
       } catch (e) {}
     });
   }

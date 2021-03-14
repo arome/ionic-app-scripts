@@ -31,9 +31,11 @@ export function run(task: string) {
   try {
     const context = generateContext(null);
     setContext(context);
-    require(`../dist/${task}`)[task](context).catch((err: any) => {
-      errorLog(task, err);
-    });
+    require(`../dist/${task}`)
+      [task](context)
+      .catch((err: any) => {
+        errorLog(task, err);
+      });
   } catch (e) {
     errorLog(task, e);
   }

@@ -1,13 +1,16 @@
 import { basename, dirname, join, normalize, relative, resolve } from 'path';
-import {
-  CallExpression,
-  Identifier,
-  PropertyAccessExpression,
-  SyntaxKind,
-  ScriptTarget
-} from 'typescript';
+import { CallExpression, Identifier, PropertyAccessExpression, SyntaxKind, ScriptTarget } from 'typescript';
 
-import { appendBefore, checkIfFunctionIsCalled, getTypescriptSourceFile, findNodes, insertNamedImportIfNeeded, replaceImportModuleSpecifier, replaceNamedImport, replaceNode } from '../util/typescript-utils';
+import {
+  appendBefore,
+  checkIfFunctionIsCalled,
+  getTypescriptSourceFile,
+  findNodes,
+  insertNamedImportIfNeeded,
+  replaceImportModuleSpecifier,
+  replaceNamedImport,
+  replaceNode
+} from '../util/typescript-utils';
 
 export function getFallbackMainContent() {
   return `
@@ -22,11 +25,10 @@ platformBrowser().bootstrapModuleFactory(AppModuleNgFactory);`;
 
 function getBootstrapNodes(allCalls: CallExpression[]) {
   return allCalls
-    .filter(call => call.expression.kind === SyntaxKind.PropertyAccessExpression)
-    .map(call => call.expression as PropertyAccessExpression)
-    .filter(access => {
-      return access.name.kind === SyntaxKind.Identifier
-          && access.name.text === 'bootstrapModule';
+    .filter((call) => call.expression.kind === SyntaxKind.PropertyAccessExpression)
+    .map((call) => call.expression as PropertyAccessExpression)
+    .filter((access) => {
+      return access.name.kind === SyntaxKind.Identifier && access.name.text === 'bootstrapModule';
     });
 }
 
@@ -35,9 +37,11 @@ function replaceNgModuleClassName(filePath: string, fileContent: string, classNa
   const allCalls = findNodes(sourceFile, sourceFile, SyntaxKind.CallExpression, true) as CallExpression[];
   const bootstraps = getBootstrapNodes(allCalls);
   let modifiedContent = fileContent;
-  allCalls.filter(call => bootstraps.some(bs => bs === call.expression)).forEach((call: CallExpression) => {
-    modifiedContent = replaceNode(filePath, modifiedContent, call.arguments[0], className + 'NgFactory');
-  });
+  allCalls
+    .filter((call) => bootstraps.some((bs) => bs === call.expression))
+    .forEach((call: CallExpression) => {
+      modifiedContent = replaceNode(filePath, modifiedContent, call.arguments[0], className + 'NgFactory');
+    });
   return modifiedContent;
 }
 
@@ -45,16 +49,19 @@ function replacePlatformBrowser(filePath: string, fileContent: string) {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const allCalls = findNodes(sourceFile, sourceFile, SyntaxKind.CallExpression, true) as CallExpression[];
   const bootstraps = getBootstrapNodes(allCalls);
-  const calls: CallExpression[] = bootstraps.reduce((previous, access) => {
+  const calls: CallExpression[] = bootstraps
+    .reduce((previous, access) => {
       const expressions = findNodes(sourceFile, access, SyntaxKind.CallExpression, true) as CallExpression[];
       return previous.concat(expressions);
     }, [])
     .filter((call: CallExpression) => {
-      return call.expression.kind === SyntaxKind.Identifier
-          && (call.expression as Identifier).text === 'platformBrowserDynamic';
+      return (
+        call.expression.kind === SyntaxKind.Identifier &&
+        (call.expression as Identifier).text === 'platformBrowserDynamic'
+      );
     });
   let modifiedContent = fileContent;
-  calls.forEach(call => {
+  calls.forEach((call) => {
     modifiedContent = replaceNode(filePath, modifiedContent, call.expression, 'platformBrowser');
   });
   return modifiedContent;
@@ -64,13 +71,16 @@ function checkForPlatformDynamicBrowser(filePath: string, fileContent: string) {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const allCalls = findNodes(sourceFile, sourceFile, SyntaxKind.CallExpression, true) as CallExpression[];
   const bootstraps = getBootstrapNodes(allCalls);
-  const calls: CallExpression[] = bootstraps.reduce((previous, access) => {
+  const calls: CallExpression[] = bootstraps
+    .reduce((previous, access) => {
       const expressions = findNodes(sourceFile, access, SyntaxKind.CallExpression, true) as CallExpression[];
       return previous.concat(expressions);
     }, [])
     .filter((call: CallExpression) => {
-      return call.expression.kind === SyntaxKind.Identifier
-          && (call.expression as Identifier).text === 'platformBrowserDynamic';
+      return (
+        call.expression.kind === SyntaxKind.Identifier &&
+        (call.expression as Identifier).text === 'platformBrowserDynamic'
+      );
     });
   return calls && calls.length;
 }
@@ -90,7 +100,12 @@ function getPlatformBrowserFunctionNode(filePath: string, fileContent: string) {
   let modifiedFileContent = fileContent;
   const sourceFile = getTypescriptSourceFile(filePath, modifiedFileContent, ScriptTarget.Latest, false);
   const allCalls = findNodes(sourceFile, sourceFile, SyntaxKind.CallExpression, true) as CallExpression[];
-  const callsToPlatformBrowser = allCalls.filter(call => call.expression && call.expression.kind === SyntaxKind.Identifier && (call.expression as Identifier).text === 'platformBrowser');
+  const callsToPlatformBrowser = allCalls.filter(
+    (call) =>
+      call.expression &&
+      call.expression.kind === SyntaxKind.Identifier &&
+      (call.expression as Identifier).text === 'platformBrowser'
+  );
   const toAppend = `enableProdMode();\n`;
   if (callsToPlatformBrowser.length) {
     modifiedFileContent = appendBefore(filePath, modifiedFileContent, callsToPlatformBrowser[0].expression, toAppend);
@@ -114,7 +129,12 @@ function importAndEnableProdMode(filePath: string, fileContent: string) {
   return modifiedFileContent;
 }
 
-export function replaceBootstrapImpl(filePath: string, fileContent: string, appNgModulePath: string, appNgModuleClassName: string) {
+export function replaceBootstrapImpl(
+  filePath: string,
+  fileContent: string,
+  appNgModulePath: string,
+  appNgModuleClassName: string
+) {
   if (!fileContent.match(/\bbootstrapModule\b/)) {
     throw new Error(`Could not find bootstrapModule in ${filePath}`);
   }
@@ -135,8 +155,18 @@ export function replaceBootstrapImpl(filePath: string, fileContent: string, appN
   modifiedFileContent = replaceBootstrapModuleFactory(filePath, modifiedFileContent);
 
   modifiedFileContent = replaceNamedImport(filePath, modifiedFileContent, 'platformBrowserDynamic', 'platformBrowser');
-  modifiedFileContent = replaceNamedImport(filePath, modifiedFileContent, appNgModuleClassName, appNgModuleClassName + 'NgFactory');
-  modifiedFileContent = replaceImportModuleSpecifier(filePath, modifiedFileContent, '@angular/platform-browser-dynamic', '@angular/platform-browser');
+  modifiedFileContent = replaceNamedImport(
+    filePath,
+    modifiedFileContent,
+    appNgModuleClassName,
+    appNgModuleClassName + 'NgFactory'
+  );
+  modifiedFileContent = replaceImportModuleSpecifier(
+    filePath,
+    modifiedFileContent,
+    '@angular/platform-browser-dynamic',
+    '@angular/platform-browser'
+  );
   modifiedFileContent = replaceImportModuleSpecifier(filePath, modifiedFileContent, originalImport, ngFactryImport);
 
   // check if prod mode is imported and enabled

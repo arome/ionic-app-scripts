@@ -6,7 +6,7 @@ describe('copy task', () => {
   describe('copyConfigToWatchConfig', () => {
     it('should convert to watch config format', () => {
       // arrange
-      const context = { };
+      const context = {};
       const configFile = 'configFile';
       const sampleConfig: copy.CopyConfig = {
         copyAssets: {
@@ -31,7 +31,7 @@ describe('copy task', () => {
         }
       };
       let combinedSource: string[] = [];
-      Object.keys(sampleConfig).forEach(entry => combinedSource = combinedSource.concat(sampleConfig[entry].src));
+      Object.keys(sampleConfig).forEach((entry) => (combinedSource = combinedSource.concat(sampleConfig[entry].src)));
 
       spyOn(config, config.generateContext.name).and.returnValue(context);
       spyOn(config, config.getUserConfigFile.name).and.returnValue(configFile);
@@ -44,7 +44,7 @@ describe('copy task', () => {
       expect(config.generateContext).toHaveBeenCalledWith(null);
       expect(config.getUserConfigFile).toHaveBeenCalledWith(context, copy.taskInfo, '');
       expect(config.fillConfigDefaults).toHaveBeenCalledWith(configFile, copy.taskInfo.defaultConfigFile);
-      (result.paths as string[]).forEach(glob => {
+      (result.paths as string[]).forEach((glob) => {
         expect(combinedSource.indexOf(glob)).not.toEqual(-1);
       });
       expect(result.callback).toBeDefined();

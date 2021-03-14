@@ -1,8 +1,6 @@
 import { File } from './interfaces';
 
-
 export class FileCache {
-
   private map: Map<string, File>;
 
   constructor() {

@@ -6,13 +6,11 @@ import * as config from './util/config';
 import * as helpers from './util/helpers';
 import * as workerClient from './worker-client';
 
-
 describe('clean css task', () => {
-
   describe('cleancss', () => {
     it('should return when the worker returns', () => {
       // arrange
-      const context = { };
+      const context = {};
       const configFile: any = null;
       const spy = spyOn(workerClient, workerClient.runWorker.name).and.returnValue(Promise.resolve());
       // act
@@ -24,42 +22,54 @@ describe('clean css task', () => {
 
     it('should throw when the worker throws', () => {
       // arrange
-      const context = { };
+      const context = {};
       const errorMessage = 'Simulating an error';
       spyOn(workerClient, workerClient.runWorker.name).and.returnValue(Promise.reject(new Error(errorMessage)));
 
       // act
-      return (cleanCss as any).cleancss(context, null).then(() => {
-        throw new Error('Should never get here');
-      }).catch((err: Error) => {
-        // assert
-        expect(err.message).toEqual(errorMessage);
-      });
+      return (cleanCss as any)
+        .cleancss(context, null)
+        .then(() => {
+          throw new Error('Should never get here');
+        })
+        .catch((err: Error) => {
+          // assert
+          expect(err.message).toEqual(errorMessage);
+        });
     });
   });
 
   describe('cleancssworker', () => {
     it('should throw when reading the file throws', () => {
-       const errorMessage = 'simulating an error';
+      const errorMessage = 'simulating an error';
       // arrange
-      const context = { buildDir: 'www'};
-      const cleanCssConfig = { sourceFileName: 'sourceFileName', destFileName: 'destFileName'};
+      const context = { buildDir: 'www' };
+      const cleanCssConfig = {
+        sourceFileName: 'sourceFileName',
+        destFileName: 'destFileName'
+      };
       spyOn(config, config.generateContext.name).and.returnValue(context);
       spyOn(config, config.fillConfigDefaults.name).and.returnValue(cleanCssConfig);
       spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.reject(new Error(errorMessage)));
 
       // act
-      return (cleanCss as any).cleancssWorker(context, null).then(() => {
-        throw new Error('Should never get here');
-      }).catch((err: Error) => {
-        expect(err.message).toEqual(errorMessage);
-      });
+      return (cleanCss as any)
+        .cleancssWorker(context, null)
+        .then(() => {
+          throw new Error('Should never get here');
+        })
+        .catch((err: Error) => {
+          expect(err.message).toEqual(errorMessage);
+        });
     });
 
     it('should return what writeFileAsync returns', () => {
       // arrange
-      const context = { buildDir: 'www'};
-      const cleanCssConfig = { sourceFileName: 'sourceFileName', destFileName: 'destFileName'};
+      const context = { buildDir: 'www' };
+      const cleanCssConfig = {
+        sourceFileName: 'sourceFileName',
+        destFileName: 'destFileName'
+      };
       const fileContent = 'content';
       const minifiedContent = 'someContent';
       spyOn(config, config.generateContext.name).and.returnValue(context);
@@ -78,7 +88,10 @@ describe('clean css task', () => {
         expect(config.generateContext).toHaveBeenCalledWith(context);
         expect(config.fillConfigDefaults).toHaveBeenCalledWith(null, (cleanCss as any).taskInfo.defaultConfigFile);
         expect(helpers.readFileAsync).toHaveBeenCalledWith(join(context.buildDir, cleanCssConfig.sourceFileName));
-        expect(helpers.writeFileAsync).toHaveBeenCalledWith(join(context.buildDir, cleanCssConfig.destFileName), minifiedContent);
+        expect(helpers.writeFileAsync).toHaveBeenCalledWith(
+          join(context.buildDir, cleanCssConfig.destFileName),
+          minifiedContent
+        );
       });
     });
   });
@@ -102,12 +115,14 @@ describe('clean css task', () => {
       const callback = minifySpy.calls.mostRecent().args[1];
       callback(new Error(errorMessage), null);
 
-      return promise.then(() => {
-        throw new Error('Should never get here');
-      }).catch((err: Error) => {
-        // assert
-        expect(err.message).toEqual(errorMessage);
-      });
+      return promise
+        .then(() => {
+          throw new Error('Should never get here');
+        })
+        .catch((err: Error) => {
+          // assert
+          expect(err.message).toEqual(errorMessage);
+        });
     });
 
     it('should reject when minification has one or more errors', () => {
@@ -130,12 +145,14 @@ describe('clean css task', () => {
       const callback = minifySpy.calls.mostRecent().args[1];
       callback(null, minificationResponse);
 
-      return promise.then(() => {
-        throw new Error('Should never get here');
-      }).catch((err: Error) => {
-        // assert
-        expect(err.message).toEqual(minificationResponse.errors[0]);
-      });
+      return promise
+        .then(() => {
+          throw new Error('Should never get here');
+        })
+        .catch((err: Error) => {
+          // assert
+          expect(err.message).toEqual(minificationResponse.errors[0]);
+        });
     });
 
     it('should return minified content', () => {
@@ -166,4 +183,3 @@ describe('clean css task', () => {
     });
   });
 });
-

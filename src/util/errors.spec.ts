@@ -1,10 +1,7 @@
 import { BuildError } from './errors';
 
-
 describe('Errors', () => {
-
   describe('BuildError', () => {
-
     it('should create BuildError from err object in constructor', () => {
       const buildError = new BuildError('message1');
       buildError.name = 'name1';
@@ -27,5 +24,4 @@ describe('Errors', () => {
       expect(buildError.hasBeenLogged).toBeFalsy();
     });
   });
-
 });

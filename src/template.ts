@@ -6,14 +6,14 @@ import { BuildContext, BuildState, ChangedFile, File } from './util/interfaces';
 import { changeExtension, getStringPropertyValue } from './util/helpers';
 import { Logger } from './logger/logger';
 
-
-
 export function templateUpdate(changedFiles: ChangedFile[], context: BuildContext) {
   try {
-    const changedTemplates = changedFiles.filter(changedFile => changedFile.ext === '.html');
+    const changedTemplates = changedFiles.filter((changedFile) => changedFile.ext === '.html');
     const start = Date.now();
 
-    const bundleFiles = context.fileCache.getAll().filter(file => file.path.indexOf(context.buildDir) >= 0 && extname(file.path) === '.js');
+    const bundleFiles = context.fileCache
+      .getAll()
+      .filter((file) => file.path.indexOf(context.buildDir) >= 0 && extname(file.path) === '.js');
 
     // update the corresponding transpiled javascript file with the template changed (inline it)
     // as well as the bundle
@@ -26,7 +26,10 @@ export function templateUpdate(changedFiles: ChangedFile[], context: BuildContex
       for (const bundleFile of bundleFiles) {
         const newContent = replaceExistingJsTemplate(bundleFile.content, file.content, changedTemplateFile.filePath);
         if (newContent && newContent !== bundleFile.content) {
-          context.fileCache.set(bundleFile.path, { path: bundleFile.path, content: newContent});
+          context.fileCache.set(bundleFile.path, {
+            path: bundleFile.path,
+            content: newContent
+          });
           writeFileSync(bundleFile.path, newContent);
         }
       }
@@ -37,14 +40,13 @@ export function templateUpdate(changedFiles: ChangedFile[], context: BuildContex
     logger.setStartTime(start);
 
     // congrats, all good
-    changedTemplates.forEach(changedTemplate => {
+    changedTemplates.forEach((changedTemplate) => {
       Logger.debug(`templateUpdate, updated: ${changedTemplate.filePath}`);
     });
 
     context.templateState = BuildState.SuccessfulBuild;
     logger.finish();
     return Promise.resolve();
-
   } catch (ex) {
     Logger.debug(`templateUpdate error: ${ex.message}`);
     context.transpileState = BuildState.RequiresBuild;
@@ -54,9 +56,20 @@ export function templateUpdate(changedFiles: ChangedFile[], context: BuildContex
   }
 }
 
-function updateCorrespondingJsFile(context: BuildContext, newTemplateContent: string, existingHtmlTemplatePath: string) {
+function updateCorrespondingJsFile(
+  context: BuildContext,
+  newTemplateContent: string,
+  existingHtmlTemplatePath: string
+) {
   const moduleFileExtension = changeExtension(getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX), '.js');
-  const javascriptFiles = context.fileCache.getAll().filter((file: File) => dirname(file.path) === dirname(existingHtmlTemplatePath) && extname(file.path) === '.js' && !file.path.endsWith(moduleFileExtension));
+  const javascriptFiles = context.fileCache
+    .getAll()
+    .filter(
+      (file: File) =>
+        dirname(file.path) === dirname(existingHtmlTemplatePath) &&
+        extname(file.path) === '.js' &&
+        !file.path.endsWith(moduleFileExtension)
+    );
   for (const javascriptFile of javascriptFiles) {
     const newContent = replaceExistingJsTemplate(javascriptFile.content, newTemplateContent, existingHtmlTemplatePath);
     if (newContent && newContent !== javascriptFile.content) {
@@ -78,7 +91,7 @@ export function inlineTemplate(sourceText: string, sourcePath: string): string {
   let replacement: string;
   let lastMatch: string = null;
 
-  while (match = getTemplateMatch(sourceText)) {
+  while ((match = getTemplateMatch(sourceText))) {
     if (match.component === lastMatch) {
       // panic! we don't want to melt any machines if there's a bug
       Logger.debug(`Error matching component: ${match.component}`);
@@ -100,7 +113,6 @@ export function inlineTemplate(sourceText: string, sourcePath: string): string {
   return sourceText;
 }
 
-
 export function updateTemplate(componentDir: string, match: TemplateUrlMatch): string {
   const htmlFilePath = join(componentDir, match.templateUrl);
 
@@ -114,7 +126,6 @@ export function updateTemplate(componentDir: string, match: TemplateUrlMatch): s
   return null;
 }
 
-
 export function replaceTemplateUrl(match: TemplateUrlMatch, htmlFilePath: string, templateContent: string): string {
   const orgTemplateProperty = match.templateProperty;
   const newTemplateProperty = getTemplateFormat(htmlFilePath, templateContent);
@@ -122,8 +133,11 @@ export function replaceTemplateUrl(match: TemplateUrlMatch, htmlFilePath: string
   return match.component.replace(orgTemplateProperty, newTemplateProperty);
 }
 
-
-export function replaceExistingJsTemplate(existingSourceText: string, newTemplateContent: string, htmlFilePath: string): string {
+export function replaceExistingJsTemplate(
+  existingSourceText: string,
+  newTemplateContent: string,
+  htmlFilePath: string
+): string {
   let prefix = getTemplatePrefix(htmlFilePath);
   let startIndex = existingSourceText.indexOf(prefix);
 
@@ -169,25 +183,21 @@ function stringify(str: string) {
   return str.substr(1, str.length - 2);
 }
 
-
 export function getTemplateFormat(htmlFilePath: string, content: string) {
   // turn the template into one line and espcape single quotes
   content = content.replace(/\r|\n/g, '\\n');
-  content = content.replace(/\'/g, '\\\'');
+  content = content.replace(/\'/g, "\\'");
 
   return `${getTemplatePrefix(htmlFilePath)}\'${content}\'${getTemplateSuffix(htmlFilePath)}`;
 }
-
 
 function getTemplatePrefix(htmlFilePath: string) {
   return `template:/*ion-inline-start:"${resolve(htmlFilePath)}"*/`;
 }
 
-
 function getTemplateSuffix(htmlFilePath: string) {
   return `/*ion-inline-end:"${resolve(htmlFilePath)}"*/`;
 }
-
 
 export function getTemplateMatch(str: string): TemplateUrlMatch {
   const match = COMPONENT_REGEX.exec(str);
@@ -202,7 +212,6 @@ export function getTemplateMatch(str: string): TemplateUrlMatch {
   }
   return null;
 }
-
 
 const COMPONENT_REGEX = /Component\s*?\(\s*?(\{([\s\S]*?)(\s*templateUrl\s*:\s*(['"`])(.*?)(['"`])\s*?)([\s\S]*?)}\s*?)\)/m;
 

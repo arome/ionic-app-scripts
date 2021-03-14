@@ -4,7 +4,6 @@ import { on, EventType } from '../util/events';
 import { Logger } from '../logger/logger';
 
 export class WatchMemorySystem {
-
   private changes: Set<string>;
   private isAggregating: boolean;
   private isListening: boolean;
@@ -16,10 +15,16 @@ export class WatchMemorySystem {
   private startTime: number;
   private options: any;
   private immediateCallback: (filePath: string, timestamp: number) => void;
-  private aggregatedCallback: (err: Error, changesFilePaths: string[], dirPaths: string[], missingPaths: string[], timesOne: any, timesTwo: any) => void;
+  private aggregatedCallback: (
+    err: Error,
+    changesFilePaths: string[],
+    dirPaths: string[],
+    missingPaths: string[],
+    timesOne: any,
+    timesTwo: any
+  ) => void;
 
-  constructor(private fileCache: FileCache, private srcDir: string) {
-  }
+  constructor(private fileCache: FileCache, private srcDir: string) {}
 
   close() {
     this.isListening = false;
@@ -29,7 +34,15 @@ export class WatchMemorySystem {
     this.isListening = false;
   }
 
-  watch(filePathsBeingWatched: string[], dirPaths: string[], missing: string[], startTime: number, options: any, aggregatedCallback: (err: Error, changesFilePaths: string[]) => void, immediateCallback: (filePath: string, timestamp: number) => void) {
+  watch(
+    filePathsBeingWatched: string[],
+    dirPaths: string[],
+    missing: string[],
+    startTime: number,
+    options: any,
+    aggregatedCallback: (err: Error, changesFilePaths: string[]) => void,
+    immediateCallback: (filePath: string, timestamp: number) => void
+  ) {
     this.filePathsBeingWatched = filePathsBeingWatched;
     this.dirPaths = dirPaths;
     this.missing = missing;
@@ -53,7 +66,15 @@ export class WatchMemorySystem {
     this.isListening = true;
     on(EventType.WebpackFilesChanged, () => {
       this.changes = new Set<string>();
-      const filePaths = this.fileCache.getAll().filter(file => file.timestamp >= this.lastWatchEventTimestamp && file.path.startsWith(this.srcDir) && extname(file.path) === '.ts').map(file => file.path);
+      const filePaths = this.fileCache
+        .getAll()
+        .filter(
+          (file) =>
+            file.timestamp >= this.lastWatchEventTimestamp &&
+            file.path.startsWith(this.srcDir) &&
+            extname(file.path) === '.ts'
+        )
+        .map((file) => file.path);
       Logger.debug('filePaths: ', filePaths);
       this.lastWatchEventTimestamp = Date.now();
       this.processChanges(filePaths);
@@ -62,7 +83,7 @@ export class WatchMemorySystem {
 
   processChanges(filePaths: string[]) {
     this.immediateCallback(filePaths[0], Date.now());
-    for ( const path of filePaths) {
+    for (const path of filePaths) {
       this.changes.add(path);
     }
     // don't bother waiting around, just call doneAggregating right away.
@@ -74,15 +95,15 @@ export class WatchMemorySystem {
     this.isAggregating = false;
     // process the changes
     const filePaths = Array.from(changes);
-    const files = filePaths.filter(filePath => this.filePathsBeingWatched.indexOf(filePath) >= 0).sort();
-    const dirs = filePaths.filter(filePath => this.dirPaths.indexOf(filePath) >= 0).sort();
-    const missing = filePaths.filter(filePath => this.missing.indexOf(filePath) >= 0).sort();
+    const files = filePaths.filter((filePath) => this.filePathsBeingWatched.indexOf(filePath) >= 0).sort();
+    const dirs = filePaths.filter((filePath) => this.dirPaths.indexOf(filePath) >= 0).sort();
+    const missing = filePaths.filter((filePath) => this.missing.indexOf(filePath) >= 0).sort();
     const times = this.getTimes(this.filePathsBeingWatched, this.startTime, this.fileCache);
     this.aggregatedCallback(null, files, dirs, missing, times, times);
   }
 
   getTimes(allFiles: string[], startTime: number, fileCache: FileCache) {
-    let times: any = { };
+    let times: any = {};
     for (const filePath of allFiles) {
       const file = fileCache.get(filePath);
       if (file) {

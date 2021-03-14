@@ -14,7 +14,21 @@ describe('source maps', () => {
 
       spyOn(helpers, helpers.mkDirpAsync.name).and.returnValue(Promise.resolve());
 
-      const knownFileNames = ['0.js', '0.js.map', '1.js', '1.js.map', 'main.js', 'main.js.map', 'vendor.js', 'vendor.js.map', 'main.css', 'polyfills.js', 'sw-toolbox.js', 'main.css', 'main.css.map'];
+      const knownFileNames = [
+        '0.js',
+        '0.js.map',
+        '1.js',
+        '1.js.map',
+        'main.js',
+        'main.js.map',
+        'vendor.js',
+        'vendor.js.map',
+        'main.css',
+        'polyfills.js',
+        'sw-toolbox.js',
+        'main.css',
+        'main.css.map'
+      ];
 
       spyOn(helpers, helpers.readDirAsync.name).and.returnValue(Promise.resolve(knownFileNames));
 
@@ -58,7 +72,21 @@ describe('source maps', () => {
 
       spyOn(helpers, helpers.mkDirpAsync.name).and.returnValue(Promise.resolve());
 
-      const knownFileNames = ['0.js', '0.js.map', '1.js', '1.js.map', 'main.js', 'main.js.map', 'vendor.js', 'vendor.js.map', 'main.css', 'polyfills.js', 'sw-toolbox.js', 'main.css', 'main.css.map'];
+      const knownFileNames = [
+        '0.js',
+        '0.js.map',
+        '1.js',
+        '1.js.map',
+        'main.js',
+        'main.js.map',
+        'vendor.js',
+        'vendor.js.map',
+        'main.css',
+        'polyfills.js',
+        'sw-toolbox.js',
+        'main.css',
+        'main.css.map'
+      ];
 
       spyOn(helpers, helpers.readDirAsync.name).and.returnValue(Promise.resolve(knownFileNames));
 

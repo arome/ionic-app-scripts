@@ -7,7 +7,6 @@ import { on, EventType } from '../util/events';
 import { Server as WebSocketServer } from 'ws';
 import { ServeConfig } from './serve-config';
 
-
 export function createNotificationServer(config: ServeConfig) {
   let wsServer: any;
   const msgToClient: WsMessage[] = [];
@@ -28,7 +27,7 @@ export function createNotificationServer(config: ServeConfig) {
     }
     if (sendMethod && wss.clients.size > 0) {
       let msg: any;
-      while (msg = msgToClient.shift()) {
+      while ((msg = msgToClient.shift())) {
         try {
           sendMethod(JSON.stringify(msg));
         } catch (e) {
@@ -69,7 +68,10 @@ export function createNotificationServer(config: ServeConfig) {
   });
 
   // create web socket server
-  const wss = new WebSocketServer({ host: config.host, port: config.notificationPort });
+  const wss = new WebSocketServer({
+    host: config.host,
+    port: config.notificationPort
+  });
   wss.broadcast = function broadcast(data: any) {
     wss.clients.forEach(function each(client: any) {
       client.send(data);
@@ -94,7 +96,6 @@ export function createNotificationServer(config: ServeConfig) {
     drainMessageQueue();
   });
 
-
   function printMessageFromClient(msg: WsMessage) {
     if (msg && msg.data) {
       switch (msg.category) {
@@ -108,7 +109,6 @@ export function createNotificationServer(config: ServeConfig) {
       }
     }
   }
-
 
   function printConsole(msg: WsMessage) {
     const args = msg.data;
@@ -131,22 +131,22 @@ export function createNotificationServer(config: ServeConfig) {
       default:
         Logger.info(log);
         break;
-      }
+    }
   }
-
 
   function handleRuntimeError(clientMsg: WsMessage) {
     const msg: WsMessage = {
       category: 'buildUpdate',
       type: 'completed',
       data: {
-        diagnosticsHtml: generateRuntimeDiagnosticContent(config.rootDir,
-                                                          config.buildDir,
-                                                          clientMsg.data.message,
-                                                          clientMsg.data.stack)
+        diagnosticsHtml: generateRuntimeDiagnosticContent(
+          config.rootDir,
+          config.buildDir,
+          clientMsg.data.message,
+          clientMsg.data.stack
+        )
       }
     };
     queueMessageSend(msg);
   }
-
 }

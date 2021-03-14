@@ -5,11 +5,28 @@ import { toUnixPath } from '../util/helpers';
 
 import * as Constants from '../util/constants';
 import * as GeneratorConstants from './constants';
-import { camelCase, constantCase, getStringPropertyValue, mkDirpAsync, paramCase, pascalCase, readFileAsync, replaceAll, sentenceCase, upperCaseFirst, writeFileAsync } from '../util/helpers';
+import {
+  camelCase,
+  constantCase,
+  getStringPropertyValue,
+  mkDirpAsync,
+  paramCase,
+  pascalCase,
+  readFileAsync,
+  replaceAll,
+  sentenceCase,
+  upperCaseFirst,
+  writeFileAsync
+} from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
 import { globAll, GlobResult } from '../util/glob-util';
 import { changeExtension, ensureSuffix, removeSuffix } from '../util/helpers';
-import { appendNgModuleDeclaration, appendNgModuleExports, appendNgModuleProvider, insertNamedImportIfNeeded } from '../util/typescript-utils';
+import {
+  appendNgModuleDeclaration,
+  appendNgModuleExports,
+  appendNgModuleProvider,
+  insertNamedImportIfNeeded
+} from '../util/typescript-utils';
 
 export function hydrateRequest(context: BuildContext, request: GeneratorRequest) {
   const hydrated = request as HydratedGeneratorRequest;
@@ -28,10 +45,8 @@ export function hydrateRequest(context: BuildContext, request: GeneratorRequest)
     }
     hydrated.ionicPage = '\n@IonicPage()';
   } else {
-
     hydrated.ionicPage = null;
     hydrated.importStatement = `import { NavController, NavParams } from 'ionic-angular';`;
-
   }
   hydrated.dirToRead = join(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_TEMPLATE_DIR), request.type);
 
@@ -48,12 +63,15 @@ export function createCommonModule(envVar: string, requestType: string) {
 
 export function hydrateTabRequest(context: BuildContext, request: GeneratorTabRequest) {
   const h = hydrateRequest(context, request);
-  const hydrated = Object.assign({
-    tabs: request.tabs,
-    tabContent: '',
-    tabVariables: '',
-    tabsImportStatement: '',
-  }, h) as HydratedGeneratorRequest;
+  const hydrated = Object.assign(
+    {
+      tabs: request.tabs,
+      tabContent: '',
+      tabVariables: '',
+      tabsImportStatement: ''
+    },
+    h
+  ) as HydratedGeneratorRequest;
 
   if (hydrated.includeNgModule) {
     hydrated.tabsImportStatement += `import { IonicPage, NavController } from 'ionic-angular';`;
@@ -73,9 +91,13 @@ export function hydrateTabRequest(context: BuildContext, request: GeneratorTabRe
     // If this is the last ion-tab to insert
     // then we do not want a new line
     if (i === request.tabs.length - 1) {
-      hydrated.tabContent += `    <ion-tab [root]="${tabVar}" tabTitle="${sentenceCase(request.tabs[i].name)}" tabIcon="information-circle"></ion-tab>`;
+      hydrated.tabContent += `    <ion-tab [root]="${tabVar}" tabTitle="${sentenceCase(
+        request.tabs[i].name
+      )}" tabIcon="information-circle"></ion-tab>`;
     } else {
-      hydrated.tabContent += `    <ion-tab [root]="${tabVar}" tabTitle="${sentenceCase(request.tabs[i].name)}" tabIcon="information-circle"></ion-tab>\n`;
+      hydrated.tabContent += `    <ion-tab [root]="${tabVar}" tabTitle="${sentenceCase(
+        request.tabs[i].name
+      )}" tabIcon="information-circle"></ion-tab>\n`;
     }
   }
 
@@ -84,11 +106,11 @@ export function hydrateTabRequest(context: BuildContext, request: GeneratorTabRe
 
 export function readTemplates(pathToRead: string): Promise<Map<string, string>> {
   const fileNames = readdirSync(pathToRead);
-  const absolutePaths = fileNames.map(fileName => {
+  const absolutePaths = fileNames.map((fileName) => {
     return join(pathToRead, fileName);
   });
   const filePathToContent = new Map<string, string>();
-  const promises = absolutePaths.map(absolutePath => {
+  const promises = absolutePaths.map((absolutePath) => {
     const promise = readFileAsync(absolutePath);
     promise.then((fileContent: string) => {
       filePathToContent.set(absolutePath, fileContent);
@@ -104,7 +126,9 @@ export function filterOutTemplates(request: HydratedGeneratorRequest, templates:
   const templatesToUseMap = new Map<string, string>();
   templates.forEach((fileContent: string, filePath: string) => {
     const newFileExtension = basename(filePath, GeneratorConstants.KNOWN_FILE_EXTENSION);
-    const shouldSkip = (!request.includeNgModule && newFileExtension === GeneratorConstants.NG_MODULE_FILE_EXTENSION) || (!request.includeSpec && newFileExtension === GeneratorConstants.SPEC_FILE_EXTENSION);
+    const shouldSkip =
+      (!request.includeNgModule && newFileExtension === GeneratorConstants.NG_MODULE_FILE_EXTENSION) ||
+      (!request.includeSpec && newFileExtension === GeneratorConstants.SPEC_FILE_EXTENSION);
     if (!shouldSkip) {
       templatesToUseMap.set(filePath, fileContent);
     }
@@ -123,13 +147,20 @@ export function applyTemplates(request: HydratedGeneratorRequest, templates: Map
     fileContent = replaceAll(fileContent, GeneratorConstants.SUPPLIEDNAME_VARIABLE, request.name);
     fileContent = replaceAll(fileContent, GeneratorConstants.TAB_CONTENT_VARIABLE, request.tabContent);
     fileContent = replaceAll(fileContent, GeneratorConstants.TAB_VARIABLES_VARIABLE, request.tabVariables);
-    fileContent = replaceAll(fileContent, GeneratorConstants.TABS_IMPORTSTATEMENT_VARIABLE, request.tabsImportStatement);
+    fileContent = replaceAll(
+      fileContent,
+      GeneratorConstants.TABS_IMPORTSTATEMENT_VARIABLE,
+      request.tabsImportStatement
+    );
     appliedTemplateMap.set(filePath, fileContent);
   });
   return appliedTemplateMap;
 }
 
-export function writeGeneratedFiles(request: HydratedGeneratorRequest, processedTemplates: Map<string, string>): Promise<string[]> {
+export function writeGeneratedFiles(
+  request: HydratedGeneratorRequest,
+  processedTemplates: Map<string, string>
+): Promise<string[]> {
   const promises: Promise<any>[] = [];
   const createdFileList: string[] = [];
   processedTemplates.forEach((fileContent: string, filePath: string) => {
@@ -197,15 +228,17 @@ export async function nonPageFileManipulation(context: BuildContext, name: strin
   if (hydratedRequest.type === 'pipe' || hydratedRequest.type === 'component' || hydratedRequest.type === 'directive') {
     if (!existsSync(envVar)) createCommonModule(envVar, hydratedRequest.type);
   }
-  const typescriptFilePath = changeExtension(templatesArray.filter(path => extname(path) === '.ts')[0], '');
-
+  const typescriptFilePath = changeExtension(templatesArray.filter((path) => extname(path) === '.ts')[0], '');
 
   readFileAsync(ngModulePath).then((content) => {
-    importPath = type === 'pipe' || type === 'component' || type === 'directive'
-      // Insert `./` if it's a pipe component or directive
-      // Since these will go in a common module.
-      ? toUnixPath(`./${relative(dirname(ngModulePath), hydratedRequest.dirToWrite)}${sep}${hydratedRequest.fileName}`)
-      : toUnixPath(`${relative(dirname(ngModulePath), hydratedRequest.dirToWrite)}${sep}${hydratedRequest.fileName}`);
+    importPath =
+      type === 'pipe' || type === 'component' || type === 'directive'
+        ? // Insert `./` if it's a pipe component or directive
+          // Since these will go in a common module.
+          toUnixPath(
+            `./${relative(dirname(ngModulePath), hydratedRequest.dirToWrite)}${sep}${hydratedRequest.fileName}`
+          )
+        : toUnixPath(`${relative(dirname(ngModulePath), hydratedRequest.dirToWrite)}${sep}${hydratedRequest.fileName}`);
 
     content = insertNamedImportIfNeeded(ngModulePath, content, hydratedRequest.className, importPath);
     if (type === 'pipe' || type === 'component' || type === 'directive') {
@@ -219,8 +252,11 @@ export async function nonPageFileManipulation(context: BuildContext, name: strin
   });
 }
 
-export function tabsModuleManipulation(tabs: string[][], hydratedRequest: HydratedGeneratorRequest, tabHydratedRequests: HydratedGeneratorRequest[]): Promise<any> {
-
+export function tabsModuleManipulation(
+  tabs: string[][],
+  hydratedRequest: HydratedGeneratorRequest,
+  tabHydratedRequests: HydratedGeneratorRequest[]
+): Promise<any> {
   tabHydratedRequests.forEach((tabRequest, index) => {
     tabRequest.generatedFileNames = tabs[index];
   });
@@ -231,9 +267,12 @@ export function tabsModuleManipulation(tabs: string[][], hydratedRequest: Hydrat
     const tabsPath = join(hydratedRequest.dirToWrite, `${hydratedRequest.fileName}.ts`);
 
     let modifiedContent: string = null;
-    return readFileAsync(tabsPath).then(content => {
+    return readFileAsync(tabsPath).then((content) => {
       tabHydratedRequests.forEach((tabRequest) => {
-        const typescriptFilePath = changeExtension(tabRequest.generatedFileNames.filter(path => extname(path) === '.ts')[0], '');
+        const typescriptFilePath = changeExtension(
+          tabRequest.generatedFileNames.filter((path) => extname(path) === '.ts')[0],
+          ''
+        );
         const importPath = toUnixPath(relative(dirname(tabsPath), typescriptFilePath));
         modifiedContent = insertNamedImportIfNeeded(tabsPath, content, tabRequest.className, importPath);
         content = modifiedContent;
@@ -241,32 +280,34 @@ export function tabsModuleManipulation(tabs: string[][], hydratedRequest: Hydrat
       return writeFileAsync(tabsPath, modifiedContent);
     });
   }
-
 }
 
-export function generateTemplates(context: BuildContext, request: HydratedGeneratorRequest, includePageConstants?: boolean): Promise<string[]> {
+export function generateTemplates(
+  context: BuildContext,
+  request: HydratedGeneratorRequest,
+  includePageConstants?: boolean
+): Promise<string[]> {
   Logger.debug('[Generators] generateTemplates: Reading templates ...');
 
   let pageConstantFile = join(context.pagesDir, 'pages.constants.ts');
   if (includePageConstants && !existsSync(pageConstantFile)) createPageConstants(context);
 
-  return readTemplates(request.dirToRead).then((map: Map<string, string>) => {
+  return readTemplates(request.dirToRead)
+    .then((map: Map<string, string>) => {
+      Logger.debug('[Generators] generateTemplates: Filtering out NgModule and Specs if needed ...');
+      return filterOutTemplates(request, map);
+    })
+    .then((filteredMap: Map<string, string>) => {
+      Logger.debug('[Generators] generateTemplates: Applying templates ...');
+      const appliedTemplateMap = applyTemplates(request, filteredMap);
 
-    Logger.debug('[Generators] generateTemplates: Filtering out NgModule and Specs if needed ...');
-    return filterOutTemplates(request, map);
+      Logger.debug('[Generators] generateTemplates: Writing generated files to disk ...');
 
-  }).then((filteredMap: Map<string, string>) => {
+      // Adding const to gets some type completion
+      if (includePageConstants) createConstStatments(pageConstantFile, request);
 
-    Logger.debug('[Generators] generateTemplates: Applying templates ...');
-    const appliedTemplateMap = applyTemplates(request, filteredMap);
-
-    Logger.debug('[Generators] generateTemplates: Writing generated files to disk ...');
-
-    // Adding const to gets some type completion
-    if (includePageConstants) createConstStatments(pageConstantFile, request);
-
-    return writeGeneratedFiles(request, appliedTemplateMap);
-  });
+      return writeGeneratedFiles(request, appliedTemplateMap);
+    });
 }
 
 export function createConstStatments(pageConstantFile: string, request: HydratedGeneratorRequest) {

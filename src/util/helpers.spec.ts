@@ -3,7 +3,6 @@ import * as helpers from './helpers';
 
 let originalEnv: any = null;
 describe('helpers', () => {
-
   beforeEach(() => {
     originalEnv = process.env;
     process.env = {};
@@ -55,7 +54,6 @@ describe('helpers', () => {
   });
 
   describe('getBooleanPropertyValue', () => {
-
     beforeEach(() => {
       originalEnv = process.env;
       process.env = {};

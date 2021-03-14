@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
 if (process.argv.length > 2) {
-
-  if (process.env.npm_config_argv && process.env.npm_config_argv.length > 0 && process.env.npm_config_argv !== 'undefined') {
+  if (
+    process.env.npm_config_argv &&
+    process.env.npm_config_argv.length > 0 &&
+    process.env.npm_config_argv !== 'undefined'
+  ) {
     try {
       var npmRunArgs = JSON.parse(process.env.npm_config_argv);
       if (npmRunArgs && npmRunArgs.original && npmRunArgs.original.length > 2) {
@@ -12,12 +15,11 @@ if (process.argv.length > 2) {
         }
       }
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 
   require('../dist/index').run(process.argv[2]);
-
 } else {
   console.error('Missing ionic app script task name');
 }

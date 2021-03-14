@@ -5,27 +5,21 @@ import { cleancss } from './cleancss';
 import { Logger } from './logger/logger';
 import { uglifyjs } from './uglifyjs';
 
-
 export function minify(context: BuildContext) {
-
   const logger = new Logger('minify');
 
   return minifyWorker(context)
     .then(() => {
       logger.finish();
     })
-    .catch(err => {
+    .catch((err) => {
       throw logger.fail(err);
     });
 }
 
-
 function minifyWorker(context: BuildContext) {
   // both css and js minify can run at the same time
-  return Promise.all([
-    minifyJs(context),
-    minifyCss(context)
-  ]);
+  return Promise.all([minifyJs(context), minifyCss(context)]);
 }
 
 export function minifyJs(context: BuildContext): Promise<any> {

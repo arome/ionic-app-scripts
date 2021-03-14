@@ -30,7 +30,7 @@ export function serve(context: BuildContext) {
   function finish() {
     if (config) {
       if (httpServer) {
-        httpServer.listen(config.httpPort, config.host, function() {
+        httpServer.listen(config.httpPort, config.host, function () {
           Logger.debug(`listening on ${config.httpPort}`);
         });
       }
@@ -41,7 +41,7 @@ export function serve(context: BuildContext) {
 
   return findClosestOpenPorts(host, [notificationPort, liveReloadServerPort, hostPort])
     .then(([notificationPortFound, liveReloadServerPortFound, hostPortFound]) => {
-      const hostLocation = (host === '0.0.0.0') ? 'localhost' : host;
+      const hostLocation = host === '0.0.0.0' ? 'localhost' : host;
 
       config = {
         httpPort: hostPortFound,
@@ -69,12 +69,15 @@ export function serve(context: BuildContext) {
 
       return watch(context);
     })
-    .then(() => {
-      finish();
-      return config;
-    }, (err: BuildError) => {
-      throw err;
-    })
+    .then(
+      () => {
+        finish();
+        return config;
+      },
+      (err: BuildError) => {
+        throw err;
+      }
+    )
     .catch((err: BuildError) => {
       if (err && err.isFatal) {
         throw err;
@@ -120,7 +123,14 @@ function getHttpServerHost(context: BuildContext): string {
 }
 
 function getLiveReloadServerPort(context: BuildContext): number {
-  const port = getConfigValue(context, '--livereload-port', null, 'IONIC_LIVERELOAD_PORT', 'ionic_livereload_port', null);
+  const port = getConfigValue(
+    context,
+    '--livereload-port',
+    null,
+    'IONIC_LIVERELOAD_PORT',
+    'ionic_livereload_port',
+    null
+  );
   if (port) {
     return parseInt(port, 10);
   }
@@ -128,7 +138,14 @@ function getLiveReloadServerPort(context: BuildContext): number {
 }
 
 export function getNotificationPort(context: BuildContext): number {
-  const port = getConfigValue(context, '--dev-logger-port', null, 'IONIC_DEV_LOGGER_PORT', 'ionic_dev_logger_port', null);
+  const port = getConfigValue(
+    context,
+    '--dev-logger-port',
+    null,
+    'IONIC_DEV_LOGGER_PORT',
+    'ionic_dev_logger_port',
+    null
+  );
   if (port) {
     return parseInt(port, 10);
   }

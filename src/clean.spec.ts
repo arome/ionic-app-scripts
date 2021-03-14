@@ -2,7 +2,6 @@ import * as fs from 'fs-extra';
 import * as clean from './clean';
 
 describe('clean task', () => {
-
   describe('clean', () => {
     it('should empty the build directory', () => {
       // arrage

@@ -32,7 +32,7 @@ var optimizedProdLoaders = [
         options: {
           sourceMap: true
         }
-      },
+      }
     ]
   },
   {
@@ -69,7 +69,7 @@ var devConfig = {
     path: '{{BUILD}}',
     publicPath: 'build/',
     filename: '[name].js',
-    devtoolModuleFilenameTemplate: ionicWebpackFactory.getSourceMapperFunction(),
+    devtoolModuleFilenameTemplate: ionicWebpackFactory.getSourceMapperFunction()
   },
   devtool: process.env.IONIC_SOURCE_MAP_TYPE,
 
@@ -116,7 +116,7 @@ var prodConfig = {
     path: '{{BUILD}}',
     publicPath: 'build/',
     filename: '[name].js',
-    devtoolModuleFilenameTemplate: ionicWebpackFactory.getSourceMapperFunction(),
+    devtoolModuleFilenameTemplate: ionicWebpackFactory.getSourceMapperFunction()
   },
   devtool: process.env.IONIC_SOURCE_MAP_TYPE,
 
@@ -150,9 +150,7 @@ var prodConfig = {
   }
 };
 
-
 module.exports = {
   dev: devConfig,
   prod: prodConfig
-}
-
+};

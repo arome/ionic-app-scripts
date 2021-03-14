@@ -1,5 +1,5 @@
 import { BuildContext } from '../util/interfaces';
-import { getContext, toUnixPath} from '../util/helpers';
+import { getContext, toUnixPath } from '../util/helpers';
 import { join, normalize, relative, resolve, sep } from 'path';
 import { SOURCE_MAP_TYPE_CHEAP, ENV_VAR_SOURCE_MAP_TYPE } from '../util/constants';
 

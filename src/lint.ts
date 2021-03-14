@@ -11,14 +11,12 @@ import { getTsConfigPath } from './transpile';
 import { BuildContext, ChangedFile, TaskInfo } from './util/interfaces';
 import { runWorker } from './worker-client';
 
-
 export interface LintWorkerConfig {
   tsConfig: string;
   tsLintConfig: string | null;
   filePaths?: string[];
   typeCheck?: boolean;
 }
-
 
 const taskInfo: TaskInfo = {
   fullArg: '--tslint',
@@ -28,10 +26,13 @@ const taskInfo: TaskInfo = {
   defaultConfigFile: '../tslint'
 };
 
-
 export function lint(context: BuildContext, tsLintConfig?: string | null, typeCheck?: boolean) {
   const logger = new Logger('lint');
-  return runWorker('lint', 'lintWorker', context, {tsLintConfig, tsConfig: getTsConfigPath(context), typeCheck: typeCheck || getBooleanPropertyValue(ENV_TYPE_CHECK_ON_LINT)})
+  return runWorker('lint', 'lintWorker', context, {
+    tsLintConfig,
+    tsConfig: getTsConfigPath(context),
+    typeCheck: typeCheck || getBooleanPropertyValue(ENV_TYPE_CHECK_ON_LINT)
+  })
     .then(() => {
       logger.finish();
     })
@@ -43,41 +44,44 @@ export function lint(context: BuildContext, tsLintConfig?: string | null, typeCh
     });
 }
 
-export function lintWorker(context: BuildContext, {tsConfig, tsLintConfig, typeCheck}: LintWorkerConfig) {
-  return getLintConfig(context, tsLintConfig)
-    .then(tsLintConfig => lintApp(context, {
+export function lintWorker(context: BuildContext, { tsConfig, tsLintConfig, typeCheck }: LintWorkerConfig) {
+  return getLintConfig(context, tsLintConfig).then((tsLintConfig) =>
+    lintApp(context, {
       tsConfig,
       tsLintConfig,
       typeCheck
-    }));
+    })
+  );
 }
 
-
 export function lintUpdate(changedFiles: ChangedFile[], context: BuildContext, typeCheck?: boolean) {
-  const changedTypescriptFiles = changedFiles.filter(changedFile => changedFile.ext === '.ts');
+  const changedTypescriptFiles = changedFiles.filter((changedFile) => changedFile.ext === '.ts');
   return runWorker('lint', 'lintUpdateWorker', context, {
     typeCheck,
     tsConfig: getTsConfigPath(context),
     tsLintConfig: getUserConfigFile(context, taskInfo, null),
-    filePaths: changedTypescriptFiles.map(changedTypescriptFile => changedTypescriptFile.filePath)
+    filePaths: changedTypescriptFiles.map((changedTypescriptFile) => changedTypescriptFile.filePath)
   });
 }
 
-export function lintUpdateWorker(context: BuildContext, {tsConfig, tsLintConfig, filePaths, typeCheck}: LintWorkerConfig) {
+export function lintUpdateWorker(
+  context: BuildContext,
+  { tsConfig, tsLintConfig, filePaths, typeCheck }: LintWorkerConfig
+) {
   const program = createProgram(context, tsConfig);
-  return getLintConfig(context, tsLintConfig)
-    .then(tsLintConfig => lintFiles(context, program, tsLintConfig, filePaths, {typeCheck}))
-    // Don't throw if linting failed
-    .catch(() => {});
+  return (
+    getLintConfig(context, tsLintConfig)
+      .then((tsLintConfig) => lintFiles(context, program, tsLintConfig, filePaths, { typeCheck }))
+      // Don't throw if linting failed
+      .catch(() => {})
+  );
 }
 
-
-function lintApp(context: BuildContext, {tsConfig, tsLintConfig, typeCheck}: LintWorkerConfig) {
+function lintApp(context: BuildContext, { tsConfig, tsLintConfig, typeCheck }: LintWorkerConfig) {
   const program = createProgram(context, tsConfig);
   const files = getFileNames(context, program);
-  return lintFiles(context, program, tsLintConfig, files, {typeCheck});
+  return lintFiles(context, program, tsLintConfig, files, { typeCheck });
 }
-
 
 function getLintConfig(context: BuildContext, tsLintConfig: string | null): Promise<string> {
   return new Promise((resolve, reject) => {

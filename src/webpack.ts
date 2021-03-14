@@ -8,9 +8,13 @@ import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/c
 import * as Constants from './util/constants';
 import { BuildError, IgnorableError } from './util/errors';
 import { emit, EventType } from './util/events';
-import { getBooleanPropertyValue, printDependencyMap, webpackStatsToDependencyMap, writeFileAsync } from './util/helpers';
+import {
+  getBooleanPropertyValue,
+  printDependencyMap,
+  webpackStatsToDependencyMap,
+  writeFileAsync
+} from './util/helpers';
 import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
-
 
 const eventEmitter = new EventEmitter();
 const INCREMENTAL_BUILD_FAILED = 'incremental_build_failed';
@@ -37,12 +41,11 @@ export function webpack(context: BuildContext, configFile: string) {
       context.bundleState = BuildState.SuccessfulBuild;
       logger.finish();
     })
-    .catch(err => {
+    .catch((err) => {
       context.bundleState = BuildState.RequiresBuild;
       throw logger.fail(err);
     });
 }
-
 
 export function webpackUpdate(changedFiles: ChangedFile[], context: BuildContext, configFile?: string) {
   const logger = new Logger('webpack update');
@@ -50,15 +53,18 @@ export function webpackUpdate(changedFiles: ChangedFile[], context: BuildContext
   Logger.debug('webpackUpdate: Starting Incremental Build');
   const promisetoReturn = runWebpackIncrementalBuild(false, context, webpackConfig);
   emit(EventType.WebpackFilesChanged, null);
-  return promisetoReturn.then((stats: any) => {
+  return promisetoReturn
+    .then((stats: any) => {
       // the webpack incremental build finished, so reset the list of pending promises
       pendingPromises = [];
       Logger.debug('webpackUpdate: Incremental Build Done, processing Data');
       return webpackBuildComplete(stats, context, webpackConfig);
-    }).then(() => {
+    })
+    .then(() => {
       context.bundleState = BuildState.SuccessfulBuild;
       return logger.finish();
-    }).catch(err => {
+    })
+    .catch((err) => {
       context.bundleState = BuildState.RequiresBuild;
       if (err instanceof IgnorableError) {
         throw err;
@@ -67,7 +73,6 @@ export function webpackUpdate(changedFiles: ChangedFile[], context: BuildContext
       throw logger.fail(err);
     });
 }
-
 
 export function webpackWorker(context: BuildContext, configFile: string): Promise<any> {
   const webpackConfig = getWebpackConfig(context, configFile);
@@ -79,10 +84,9 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
     promise = runWebpackFullBuild(webpackConfig);
   }
 
-  return promise
-    .then((stats: any) => {
-      return webpackBuildComplete(stats, context, webpackConfig);
-    });
+  return promise.then((stats: any) => {
+    return webpackBuildComplete(stats, context, webpackConfig);
+  });
 }
 
 function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: WebpackConfig) {
@@ -108,7 +112,7 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
     }
   });
 
-  const trimmedFiles = files.filter(file => file && file.length > 0);
+  const trimmedFiles = files.filter((file) => file && file.length > 0);
 
   context.moduleFiles = trimmedFiles;
 
@@ -116,10 +120,12 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 }
 
 export function setBundledFiles(context: BuildContext) {
-  const bundledFilesToWrite = context.fileCache.getAll().filter(file => {
-    return dirname(file.path).indexOf(context.buildDir) >= 0 && (file.path.endsWith('.js') || file.path.endsWith('.js.map'));
+  const bundledFilesToWrite = context.fileCache.getAll().filter((file) => {
+    return (
+      dirname(file.path).indexOf(context.buildDir) >= 0 && (file.path.endsWith('.js') || file.path.endsWith('.js.map'))
+    );
   });
-  context.bundledFilePaths = bundledFilesToWrite.map(bundledFile => bundledFile.path);
+  context.bundledFilePaths = bundledFilesToWrite.map((bundledFile) => bundledFile.path);
 }
 
 export function runWebpackFullBuild(config: WebpackConfig) {
@@ -170,7 +176,13 @@ function runWebpackIncrementalBuild(initializeWatch: boolean, context: BuildCont
   return promise;
 }
 
-function handleWebpackBuildFailure(resolve: Function, reject: Function, error: Error, promise: Promise<any>, pendingPromises: Promise<void>[]) {
+function handleWebpackBuildFailure(
+  resolve: Function,
+  reject: Function,
+  error: Error,
+  promise: Promise<any>,
+  pendingPromises: Promise<void>[]
+) {
   // check if the promise if the last promise in the list of pending promises
   if (pendingPromises.length > 0 && pendingPromises[pendingPromises.length - 1] === promise) {
     // reject this one with a build error
@@ -181,7 +193,13 @@ function handleWebpackBuildFailure(resolve: Function, reject: Function, error: E
   reject(new IgnorableError());
 }
 
-function handleWebpackBuildSuccess(resolve: Function, reject: Function, stats: any, promise: Promise<any>, pendingPromises: Promise<void>[]) {
+function handleWebpackBuildSuccess(
+  resolve: Function,
+  reject: Function,
+  stats: any,
+  promise: Promise<any>,
+  pendingPromises: Promise<void>[]
+) {
   // check if the promise if the last promise in the list of pending promises
   if (pendingPromises.length > 0 && pendingPromises[pendingPromises.length - 1] === promise) {
     Logger.debug('handleWebpackBuildSuccess: Resolving with Webpack data');
@@ -223,7 +241,6 @@ export function getWebpackConfigFromDictionary(context: BuildContext, webpackCon
   return webpackConfigDictionary['dev'];
 }
 
-
 export function getOutputDest(context: BuildContext) {
   const webpackConfig = getWebpackConfig(context, null);
   return join(webpackConfig.output.path, webpackConfig.output.filename);
@@ -236,7 +253,6 @@ const taskInfo: TaskInfo = {
   packageConfig: 'ionic_webpack',
   defaultConfigFile: 'webpack.config'
 };
-
 
 export interface WebpackConfig {
   // https://www.npmjs.com/package/webpack

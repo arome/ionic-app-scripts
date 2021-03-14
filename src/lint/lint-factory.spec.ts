@@ -12,16 +12,12 @@ import {
   typeCheck
 } from './lint-factory';
 
-
 describe('lint factory', () => {
   describe('createProgram()', () => {
     it('should create a TS Program', () => {
-      const context: any = {rootDir: ''};
+      const context: any = { rootDir: '' };
       const program: any = createProgram(context, '');
-      const fns = [
-        'getSourceFiles',
-        'getTypeChecker'
-      ];
+      const fns = ['getSourceFiles', 'getTypeChecker'];
 
       expect(isObject(program)).toBeTruthy();
       for (const fn of fns) {
@@ -33,7 +29,7 @@ describe('lint factory', () => {
   describe('getTsLintConfig()', () => {
     it('should fetch the TSLint configuration from file path', () => {
       const tsConfigFilePath = 'tsconfig.json';
-      const mockConfig = {rulesDirectory: ['node_modules/@ionic']};
+      const mockConfig = { rulesDirectory: ['node_modules/@ionic'] };
       spyOn(Configuration, Configuration.loadConfigurationFromPath.name).and.returnValue(mockConfig);
 
       const config = getTsLintConfig(tsConfigFilePath);
@@ -45,7 +41,7 @@ describe('lint factory', () => {
 
     it('should extend configuration with {linterOptions} if provided', () => {
       const tsConfigFilePath = 'tsconfig.json';
-      const mockConfig = {rulesDirectory: ['node_modules/@ionic']};
+      const mockConfig = { rulesDirectory: ['node_modules/@ionic'] };
       spyOn(Configuration, Configuration.loadConfigurationFromPath.name).and.returnValue(mockConfig);
       const config = getTsLintConfig(tsConfigFilePath, {
         typeCheck: true
@@ -59,7 +55,7 @@ describe('lint factory', () => {
 
   describe('createLinter()', () => {
     it('should create a Linter', () => {
-      const context: any = {rootDir: ''};
+      const context: any = { rootDir: '' };
       const program = createProgram(context, '');
       const linter = createLinter(context, program);
 
@@ -69,7 +65,7 @@ describe('lint factory', () => {
 
   describe('getFileNames()', () => {
     it('should get the file names referenced in the tsconfig.json', () => {
-      const context: any = {rootDir: ''};
+      const context: any = { rootDir: '' };
       const program = createProgram(context, '');
       const mockFiles = ['test.ts'];
       spyOn(Linter, 'getFileNames').and.returnValue(mockFiles);
@@ -81,47 +77,47 @@ describe('lint factory', () => {
   });
 
   describe('typeCheck()', () => {
-    it('should not be called if {typeCheck} is false', done => {
-      const context: any = {rootDir: ''};
+    it('should not be called if {typeCheck} is false', (done) => {
+      const context: any = { rootDir: '' };
       const program = createProgram(context, '');
 
       spyOn(ts, ts.getPreEmitDiagnostics.name).and.returnValue([]);
 
-      typeCheck(context, program, {typeCheck: false})
-        .then((result) => {
-          expect(ts.getPreEmitDiagnostics).toHaveBeenCalledTimes(0);
-          expect(result).toEqual([]);
-          done();
-        });
+      typeCheck(context, program, { typeCheck: false }).then((result) => {
+        expect(ts.getPreEmitDiagnostics).toHaveBeenCalledTimes(0);
+        expect(result).toEqual([]);
+        done();
+      });
     });
 
-    it('should type check if {typeCheck} is true', done => {
-      const context: any = {rootDir: ''};
+    it('should type check if {typeCheck} is true', (done) => {
+      const context: any = { rootDir: '' };
       const program = createProgram(context, '');
 
-      const diagnostics: any = [{
-        file: {},
-        start: 2,
-        length: 10,
-        messageText: 'Oops',
-        category: DiagnosticCategory.Warning,
-        code: 120
-      }];
+      const diagnostics: any = [
+        {
+          file: {},
+          start: 2,
+          length: 10,
+          messageText: 'Oops',
+          category: DiagnosticCategory.Warning,
+          code: 120
+        }
+      ];
 
       spyOn(ts, ts.getPreEmitDiagnostics.name).and.returnValue(diagnostics);
 
-      typeCheck(context, program, {typeCheck: true})
-        .then((result) => {
-          expect(ts.getPreEmitDiagnostics).toHaveBeenCalledWith(program);
-          expect(result).toEqual(diagnostics);
-          done();
-        });
+      typeCheck(context, program, { typeCheck: true }).then((result) => {
+        expect(ts.getPreEmitDiagnostics).toHaveBeenCalledWith(program);
+        expect(result).toEqual(diagnostics);
+        done();
+      });
     });
   });
 
   describe('lint()', () => {
     it('should lint a file', () => {
-      const context: any = {rootDir: ''};
+      const context: any = { rootDir: '' };
       const program = createProgram(context, '');
       const linter = createLinter(context, program);
       spyOn(linter, 'lint').and.returnValue(undefined);
@@ -136,7 +132,7 @@ describe('lint factory', () => {
   });
   describe('getLintResult()', () => {
     it('should get the lint results after linting a file', () => {
-      const context: any = {rootDir: ''};
+      const context: any = { rootDir: '' };
       const program = createProgram(context, '');
       const linter = createLinter(context, program);
       spyOn(linter, 'lint').and.returnValue(undefined);

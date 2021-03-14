@@ -19,12 +19,17 @@ import {
   SourceFile,
   StringLiteral,
   SyntaxKind,
-  createSourceFile,
+  createSourceFile
 } from 'typescript';
 
 import { rangeReplace, stringSplice } from './helpers';
 
-export function getTypescriptSourceFile(filePath: string, fileContent: string, languageVersion: ScriptTarget = ScriptTarget.Latest, setParentNodes: boolean = false): SourceFile {
+export function getTypescriptSourceFile(
+  filePath: string,
+  fileContent: string,
+  languageVersion: ScriptTarget = ScriptTarget.Latest,
+  setParentNodes: boolean = false
+): SourceFile {
   return createSourceFile(filePath, fileContent, languageVersion, setParentNodes);
 }
 
@@ -32,7 +37,7 @@ export function removeDecorators(fileName: string, source: string): string {
   const sourceFile = createSourceFile(fileName, source, ScriptTarget.Latest);
   const decorators = findNodes(sourceFile, sourceFile, SyntaxKind.Decorator, true);
   decorators.sort((a, b) => b.pos - a.pos);
-  decorators.forEach(d => {
+  decorators.forEach((d) => {
     source = source.slice(0, d.pos) + source.slice(d.end);
   });
 
@@ -44,9 +49,12 @@ export function findNodes(sourceFile: SourceFile, node: Node, kind: SyntaxKind, 
     return [node];
   }
 
-  return node.getChildren(sourceFile).reduce((result, n) => {
-    return result.concat(findNodes(sourceFile, n, kind, keepGoing));
-  }, node.kind === kind ? [node] : []);
+  return node.getChildren(sourceFile).reduce(
+    (result, n) => {
+      return result.concat(findNodes(sourceFile, n, kind, keepGoing));
+    },
+    node.kind === kind ? [node] : []
+  );
 }
 
 export function replaceNode(filePath: string, fileContent: string, node: Node, replacement: string): string {
@@ -82,22 +90,32 @@ export function appendBefore(filePath: string, fileContent: string, node: Node, 
   return stringSplice(fileContent, node.getStart(sourceFile), 0, toAppend);
 }
 
-export function insertNamedImportIfNeeded(filePath: string, fileContent: string, namedImport: string, fromModule: string) {
+export function insertNamedImportIfNeeded(
+  filePath: string,
+  fileContent: string,
+  namedImport: string,
+  fromModule: string
+) {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const allImports = findNodes(sourceFile, sourceFile, SyntaxKind.ImportDeclaration);
-  const maybeImports = allImports.filter((node: ImportDeclaration) => {
-    return node.moduleSpecifier.kind === SyntaxKind.StringLiteral
-      && (node.moduleSpecifier as StringLiteral).text === fromModule;
-  }).filter((node: ImportDeclaration) => {
-    // Remove import statements that are either `import 'XYZ'` or `import * as X from 'XYZ'`.
-    const clause = node.importClause as ImportClause;
-    if (!clause || clause.name || !clause.namedBindings) {
-      return false;
-    }
-    return clause.namedBindings.kind === SyntaxKind.NamedImports;
-  }).map((node: ImportDeclaration) => {
-    return (node.importClause as ImportClause).namedBindings as NamedImports;
-  });
+  const maybeImports = allImports
+    .filter((node: ImportDeclaration) => {
+      return (
+        node.moduleSpecifier.kind === SyntaxKind.StringLiteral &&
+        (node.moduleSpecifier as StringLiteral).text === fromModule
+      );
+    })
+    .filter((node: ImportDeclaration) => {
+      // Remove import statements that are either `import 'XYZ'` or `import * as X from 'XYZ'`.
+      const clause = node.importClause as ImportClause;
+      if (!clause || clause.name || !clause.namedBindings) {
+        return false;
+      }
+      return clause.namedBindings.kind === SyntaxKind.NamedImports;
+    })
+    .map((node: ImportDeclaration) => {
+      return (node.importClause as ImportClause).namedBindings as NamedImports;
+    });
 
   if (maybeImports.length) {
     // There's an `import {A, B, C} from 'modulePath'`.
@@ -113,43 +131,66 @@ export function insertNamedImportIfNeeded(filePath: string, fileContent: string,
     }
 
     // Just pick the first one and insert at the end of its identifier list.
-    fileContent = appendAfter(fileContent, maybeImports[0].elements[maybeImports[0].elements.length - 1], `, ${namedImport}`);
+    fileContent = appendAfter(
+      fileContent,
+      maybeImports[0].elements[maybeImports[0].elements.length - 1],
+      `, ${namedImport}`
+    );
   } else {
     // Find the last import and insert after.
-    fileContent = appendAfter(fileContent, allImports[allImports.length - 1],
-      `\nimport { ${namedImport} } from '${fromModule}';`);
+    fileContent = appendAfter(
+      fileContent,
+      allImports[allImports.length - 1],
+      `\nimport { ${namedImport} } from '${fromModule}';`
+    );
   }
 
   return fileContent;
 }
 
-export function replaceNamedImport(filePath: string, fileContent: string, namedImportOriginal: string, namedImportReplacement: string) {
+export function replaceNamedImport(
+  filePath: string,
+  fileContent: string,
+  namedImportOriginal: string,
+  namedImportReplacement: string
+) {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const allImports = findNodes(sourceFile, sourceFile, SyntaxKind.ImportDeclaration);
   let modifiedContent = fileContent;
-  allImports.filter((node: ImportDeclaration) => {
-    if (node.importClause && node.importClause.namedBindings) {
-      return node.importClause.namedBindings.kind === SyntaxKind.NamedImports;
-    }
-  }).map((importDeclaration: ImportDeclaration) => {
-    return (importDeclaration.importClause as ImportClause).namedBindings as NamedImports;
-  }).forEach((namedImport: NamedImports) => {
-    return namedImport.elements.forEach((element: ImportSpecifier) => {
-      if (element.name.text === namedImportOriginal) {
-        modifiedContent = replaceNode(filePath, modifiedContent, element, namedImportReplacement);
+  allImports
+    .filter((node: ImportDeclaration) => {
+      if (node.importClause && node.importClause.namedBindings) {
+        return node.importClause.namedBindings.kind === SyntaxKind.NamedImports;
       }
+    })
+    .map((importDeclaration: ImportDeclaration) => {
+      return (importDeclaration.importClause as ImportClause).namedBindings as NamedImports;
+    })
+    .forEach((namedImport: NamedImports) => {
+      return namedImport.elements.forEach((element: ImportSpecifier) => {
+        if (element.name.text === namedImportOriginal) {
+          modifiedContent = replaceNode(filePath, modifiedContent, element, namedImportReplacement);
+        }
+      });
     });
-  });
 
   return modifiedContent;
 }
 
-export function replaceImportModuleSpecifier(filePath: string, fileContent: string, moduleSpecifierOriginal: string, moduleSpecifierReplacement: string) {
+export function replaceImportModuleSpecifier(
+  filePath: string,
+  fileContent: string,
+  moduleSpecifierOriginal: string,
+  moduleSpecifierReplacement: string
+) {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const allImports = findNodes(sourceFile, sourceFile, SyntaxKind.ImportDeclaration);
   let modifiedContent = fileContent;
   allImports.forEach((node: ImportDeclaration) => {
-    if (node.moduleSpecifier.kind === SyntaxKind.StringLiteral && (node.moduleSpecifier as StringLiteral).text === moduleSpecifierOriginal) {
+    if (
+      node.moduleSpecifier.kind === SyntaxKind.StringLiteral &&
+      (node.moduleSpecifier as StringLiteral).text === moduleSpecifierOriginal
+    ) {
       modifiedContent = replaceNode(filePath, modifiedContent, node.moduleSpecifier, `'${moduleSpecifierReplacement}'`);
     }
   });
@@ -159,7 +200,12 @@ export function replaceImportModuleSpecifier(filePath: string, fileContent: stri
 export function checkIfFunctionIsCalled(filePath: string, fileContent: string, functionName: string) {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const allCalls = findNodes(sourceFile, sourceFile, SyntaxKind.CallExpression, true) as CallExpression[];
-  const functionCallList = allCalls.filter(call => call.expression && call.expression.kind === SyntaxKind.Identifier && (call.expression as Identifier).text === functionName);
+  const functionCallList = allCalls.filter(
+    (call) =>
+      call.expression &&
+      call.expression.kind === SyntaxKind.Identifier &&
+      (call.expression as Identifier).text === functionName
+  );
   return functionCallList.length > 0;
 }
 
@@ -172,10 +218,14 @@ export function getNgModuleClassName(filePath: string, fileContent: string) {
   const classDeclarations = getClassDeclarations(ngModuleSourceFile);
   // find the class with NgModule decorator;
   const classNameList: string[] = [];
-  classDeclarations.forEach(classDeclaration => {
+  classDeclarations.forEach((classDeclaration) => {
     if (classDeclaration && classDeclaration.decorators) {
-      classDeclaration.decorators.forEach(decorator => {
-        if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT) {
+      classDeclaration.decorators.forEach((decorator) => {
+        if (
+          decorator.expression &&
+          (decorator.expression as CallExpression).expression &&
+          ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT
+        ) {
           const className = (classDeclaration.name as Identifier).text;
           classNameList.push(className);
         }
@@ -188,7 +238,9 @@ export function getNgModuleClassName(filePath: string, fileContent: string) {
   }
 
   if (classNameList.length > 1) {
-    throw new Error(`Multiple class declarations with NgModule in ${filePath}. The correct class to use could not be determined.`);
+    throw new Error(
+      `Multiple class declarations with NgModule in ${filePath}. The correct class to use could not be determined.`
+    );
   }
 
   return classNameList[0];
@@ -197,10 +249,14 @@ export function getNgModuleClassName(filePath: string, fileContent: string) {
 export function getNgModuleDecorator(fileName: string, sourceFile: SourceFile) {
   const ngModuleDecorators: Decorator[] = [];
   const classDeclarations = getClassDeclarations(sourceFile);
-  classDeclarations.forEach(classDeclaration => {
+  classDeclarations.forEach((classDeclaration) => {
     if (classDeclaration && classDeclaration.decorators) {
-      classDeclaration.decorators.forEach(decorator => {
-        if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT) {
+      classDeclaration.decorators.forEach((decorator) => {
+        if (
+          decorator.expression &&
+          (decorator.expression as CallExpression).expression &&
+          ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT
+        ) {
           ngModuleDecorators.push(decorator);
         }
       });
@@ -212,7 +268,9 @@ export function getNgModuleDecorator(fileName: string, sourceFile: SourceFile) {
   }
 
   if (ngModuleDecorators.length > 1) {
-    throw new Error(`Multiple "NgModule" decorators found in ${fileName}. The correct one to use could not be determined`);
+    throw new Error(
+      `Multiple "NgModule" decorators found in ${fileName}. The correct one to use could not be determined`
+    );
   }
 
   return ngModuleDecorators[0];
@@ -226,17 +284,24 @@ export function getNgModuleObjectLiteralArg(decorator: Decorator) {
   return ngModuleArgs[0] as ObjectLiteralExpression;
 }
 
-export function findObjectLiteralElementByName(properties: NodeArray<ObjectLiteralElement>, identifierToLookFor: string) {
+export function findObjectLiteralElementByName(
+  properties: NodeArray<ObjectLiteralElement>,
+  identifierToLookFor: string
+) {
   return properties.filter((propertyNode) => {
-    return propertyNode && (propertyNode as PropertyAssignment).name && ((propertyNode as PropertyAssignment).name as Identifier).text === identifierToLookFor;
+    return (
+      propertyNode &&
+      (propertyNode as PropertyAssignment).name &&
+      ((propertyNode as PropertyAssignment).name as Identifier).text === identifierToLookFor
+    );
   })[0];
 }
 
-export function appendNgModuleDeclaration(filePath: string, fileContent: string, declaration: string, ): string {
+export function appendNgModuleDeclaration(filePath: string, fileContent: string, declaration: string): string {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const decorator = getNgModuleDecorator(path.basename(filePath), sourceFile);
   const obj = getNgModuleObjectLiteralArg(decorator);
-  const properties = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment);
+  const properties = findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment;
   const declarations = (properties.initializer as ArrayLiteralExpression).elements;
   if (declarations.length === 0) {
     return appendEmpty(fileContent, declarations['end'], declaration);
@@ -249,28 +314,26 @@ export function appendNgModuleProvider(filePath: string, fileContent: string, de
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const decorator = getNgModuleDecorator(path.basename(filePath), sourceFile);
   const obj = getNgModuleObjectLiteralArg(decorator);
-  const properties = (findObjectLiteralElementByName(obj.properties, 'providers') as PropertyAssignment);
+  const properties = findObjectLiteralElementByName(obj.properties, 'providers') as PropertyAssignment;
   const providers = (properties.initializer as ArrayLiteralExpression).elements;
   if (providers.length === 0) {
     return appendEmpty(fileContent, providers['end'], declaration);
   } else {
     return appendAfter(fileContent, providers[providers.length - 1], `,\n    ${declaration}`);
   }
-
 }
 
 export function appendNgModuleExports(filePath: string, fileContent: string, declaration: string): string {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const decorator = getNgModuleDecorator(path.basename(filePath), sourceFile);
   const obj = getNgModuleObjectLiteralArg(decorator);
-  const properties = (findObjectLiteralElementByName(obj.properties, 'exports') as PropertyAssignment);
+  const properties = findObjectLiteralElementByName(obj.properties, 'exports') as PropertyAssignment;
   const exportsProp = (properties.initializer as ArrayLiteralExpression).elements;
   if (exportsProp.length === 0) {
     return appendEmpty(fileContent, exportsProp['end'], declaration);
   } else {
     return appendAfter(fileContent, exportsProp[exportsProp.length - 1], `,\n    ${declaration}`);
   }
-
 }
 
 export const NG_MODULE_DECORATOR_TEXT = 'NgModule';

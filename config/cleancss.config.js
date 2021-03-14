@@ -1,4 +1,3 @@
-
 // https://www.npmjs.com/package/clean-css
 
 module.exports = {
@@ -11,5 +10,4 @@ module.exports = {
    * destFileName: the file name for the generated minified file
    */
   destFileName: process.env.IONIC_OUTPUT_CSS_FILE_NAME
-
 };

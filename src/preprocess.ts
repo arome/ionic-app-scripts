@@ -8,10 +8,10 @@ import { getBooleanPropertyValue, getStringPropertyValue } from './util/helpers'
 import { BuildContext, ChangedFile } from './util/interfaces';
 import { bundleCoreComponents } from './core/bundle-components';
 
-
 export function preprocess(context: BuildContext) {
   const logger = new Logger(`preprocess`);
-  return preprocessWorker(context).then(() => {
+  return preprocessWorker(context)
+    .then(() => {
       logger.finish();
     })
     .catch((err: Error) => {
@@ -30,7 +30,7 @@ function preprocessWorker(context: BuildContext) {
 export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildContext) {
   const promises: Promise<any>[] = [];
 
-  if (changedFiles.some(cf => cf.ext === '.scss')) {
+  if (changedFiles.some((cf) => cf.ext === '.scss')) {
     promises.push(bundleCoreComponents(context));
   }
 

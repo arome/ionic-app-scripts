@@ -19,7 +19,7 @@ describe('test serve', () => {
     context = {
       rootDir: '/',
       wwwDir: '/www',
-      buildDir: '/build',
+      buildDir: '/build'
     };
     configResults = {
       httpPort: 8100,

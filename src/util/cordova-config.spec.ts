@@ -9,12 +9,12 @@ describe('parseConfig function', () => {
   it('should return a CordovaProject without id or version if config.$ does not exist', () => {
     var result = cordovaConfig.parseConfig({
       widget: {
-        name: ['thename'],
+        name: ['thename']
       }
     });
 
     expect(result).toEqual({
-      name: 'thename',
+      name: 'thename'
     });
   });
 

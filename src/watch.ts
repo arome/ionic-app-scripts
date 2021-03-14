@@ -3,7 +3,7 @@ import { extname, join, normalize, resolve as pathResolve } from 'path';
 import * as chokidar from 'chokidar';
 
 import * as buildTask from './build';
-import { copyUpdate as copyUpdateHandler} from './copy';
+import { copyUpdate as copyUpdateHandler } from './copy';
 import { Logger } from './logger/logger';
 import { canRunTranspileUpdate } from './transpile';
 import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/config';
@@ -11,7 +11,6 @@ import * as Constants from './util/constants';
 import { BuildError } from './util/errors';
 import { getIntPropertyValue } from './util/helpers';
 import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
-
 
 // https://github.com/paulmillr/chokidar
 
@@ -41,7 +40,8 @@ export function watch(context?: BuildContext, configFile?: string) {
     });
   }
 
-  return buildTask.build(context)
+  return buildTask
+    .build(context)
     .then(buildDone, (err: BuildError) => {
       if (err && err.isFatal) {
         throw err;
@@ -49,11 +49,10 @@ export function watch(context?: BuildContext, configFile?: string) {
         buildDone();
       }
     })
-    .catch(err => {
+    .catch((err) => {
       throw logger.fail(err);
     });
 }
-
 
 function startWatchers(context: BuildContext, configFile: string) {
   const watchConfig: WatchConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
@@ -66,10 +65,8 @@ function startWatchers(context: BuildContext, configFile: string) {
   return Promise.all(promises);
 }
 
-
 function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
   return new Promise((resolve, reject) => {
-
     // If a file isn't found (probably other scenarios too),
     // Chokidar watches don't always trigger the ready or error events
     // so set a timeout, and clear it if they do fire
@@ -81,7 +78,11 @@ function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
       } else if (Array.isArray(watcher.paths)) {
         filesWatchedString = watcher.paths.join(', ');
       }
-      reject(new BuildError(`A watch configured to watch the following paths failed to start. It likely that a file referenced does not exist: ${filesWatchedString}`));
+      reject(
+        new BuildError(
+          `A watch configured to watch the following paths failed to start. It likely that a file referenced does not exist: ${filesWatchedString}`
+        )
+      );
     }, getIntPropertyValue(Constants.ENV_START_WATCH_TIMEOUT));
 
     prepareWatcher(context, watcher);
@@ -116,19 +117,25 @@ function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
 
       filePath = normalize(pathResolve(join(context.rootDir, filePath)));
 
-      Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
+      Logger.debug(
+        `watch callback start, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`
+      );
 
-      const callbackToExecute = function(event: string, filePath: string, context: BuildContext, watcher: Watcher) {
+      const callbackToExecute = function (event: string, filePath: string, context: BuildContext, watcher: Watcher) {
         return watcher.callback(event, filePath, context);
       };
 
       callbackToExecute(event, filePath, context, watcher)
         .then(() => {
-          Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
+          Logger.debug(
+            `watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`
+          );
           watchCount++;
         })
-        .catch(err => {
-          Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
+        .catch((err) => {
+          Logger.debug(
+            `watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`
+          );
           Logger.debug(`${err}`);
           watchCount++;
         });
@@ -144,7 +151,6 @@ function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
       clearTimeout(timeoutId);
       reject(new BuildError(`watcher error: ${watcher.options.cwd}${watcher.paths}: ${err}`));
     });
-
   });
 }
 
@@ -161,7 +167,7 @@ export function prepareWatcher(context: BuildContext, watcher: Watcher) {
 
   if (watcher.options.ignored) {
     if (Array.isArray(watcher.options.ignored)) {
-      watcher.options.ignored = watcher.options.ignored.map(p => normalize(replacePathVars(context, p)));
+      watcher.options.ignored = watcher.options.ignored.map((p) => normalize(replacePathVars(context, p)));
     } else if (typeof watcher.options.ignored === 'string') {
       // it's a string, so just do it once and leave it
       watcher.options.ignored = normalize(replacePathVars(context, watcher.options.ignored));
@@ -170,13 +176,12 @@ export function prepareWatcher(context: BuildContext, watcher: Watcher) {
 
   if (watcher.paths) {
     if (Array.isArray(watcher.paths)) {
-      watcher.paths = watcher.paths.map(p => normalize(replacePathVars(context, p)));
+      watcher.paths = watcher.paths.map((p) => normalize(replacePathVars(context, p)));
     } else {
       watcher.paths = normalize(replacePathVars(context, watcher.paths));
     }
   }
 }
-
 
 let queuedWatchEventsMap = new Map<string, ChangedFile>();
 let queuedWatchEventsTimerId: any;
@@ -199,10 +204,9 @@ export function queueWatchUpdatesForBuild(event: string, filePath: string, conte
 
   // run this code in a few milliseconds if another hasn't come in behind it
   queuedWatchEventsTimerId = setTimeout(() => {
-
     // figure out what actually needs to be rebuilt
     const queuedChangeFileList: ChangedFile[] = [];
-    queuedWatchEventsMap.forEach(changedFile => queuedChangeFileList.push(changedFile));
+    queuedWatchEventsMap.forEach((changedFile) => queuedChangeFileList.push(changedFile));
 
     const changedFiles = runBuildUpdate(context, queuedChangeFileList);
 
@@ -228,7 +232,7 @@ export function queueOrRunBuildUpdate(changedFiles: ChangedFile[], context: Buil
 
     // in the event this is called multiple times while queued, we are following a "last event wins" pattern
     // so if someone makes an edit, and then deletes a file, the last "ChangedFile" is the one we act upon
-    changedFiles.forEach(changedFile => {
+    changedFiles.forEach((changedFile) => {
       queuedChangedFileMap.set(changedFile.filePath, changedFile);
     });
     return buildUpdatePromise;
@@ -242,7 +246,7 @@ export function queueOrRunBuildUpdate(changedFiles: ChangedFile[], context: Buil
       buildUpdatePromise = null;
       if (queuedChangedFileMap.size > 0) {
         const queuedChangeFileList: ChangedFile[] = [];
-        queuedChangedFileMap.forEach(changedFile => {
+        queuedChangedFileMap.forEach((changedFile) => {
           queuedChangeFileList.push(changedFile);
         });
         return queueOrRunBuildUpdate(queuedChangeFileList, context);
@@ -257,11 +261,6 @@ export function queueOrRunBuildUpdate(changedFiles: ChangedFile[], context: Buil
   }
 }
 
-
-
-
-
-
 let queuedCopyChanges: ChangedFile[] = [];
 let queuedCopyTimerId: any;
 
@@ -272,7 +271,7 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
     ext: extname(filePath).toLowerCase()
   };
   // do not allow duplicates
-  if (!queuedCopyChanges.some(f => f.filePath === filePath)) {
+  if (!queuedCopyChanges.some((f) => f.filePath === filePath)) {
     queuedCopyChanges.push(changedFile);
 
     // debounce our build update incase there are multiple files
@@ -280,7 +279,6 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
 
     // run this code in a few milliseconds if another hasn't come in behind it
     queuedCopyTimerId = setTimeout(() => {
-
       const changedFiles = queuedCopyChanges.concat([]);
       // clear out all the files that are queued up for the build update
       queuedCopyChanges.length = 0;
@@ -295,13 +293,12 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
   return Promise.resolve();
 }
 
-
 export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[]) {
   if (!changedFiles || !changedFiles.length) {
     return null;
   }
 
-  const jsFiles = changedFiles.filter(f => f.ext === '.js');
+  const jsFiles = changedFiles.filter((f) => f.ext === '.js');
   if (jsFiles.length) {
     // this is mainly for linked modules
     // if a linked library has changed (which would have a js extention)
@@ -309,7 +306,7 @@ export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[
     context.bundleState = BuildState.RequiresUpdate;
   }
 
-  const tsFiles = changedFiles.filter(f => f.ext === '.ts');
+  const tsFiles = changedFiles.filter((f) => f.ext === '.ts');
   if (tsFiles.length) {
     let requiresFullBuild = false;
     for (const tsFile of tsFiles) {
@@ -330,27 +327,25 @@ export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[
     }
   }
 
-
-  const sassFiles = changedFiles.filter(f => /^\.s(c|a)ss$/.test(f.ext));
+  const sassFiles = changedFiles.filter((f) => /^\.s(c|a)ss$/.test(f.ext));
   if (sassFiles.length) {
     // .scss or .sass file was changed/added/deleted, lets do a sass update
     context.sassState = BuildState.RequiresUpdate;
   }
 
-  const sassFilesNotChanges = changedFiles.filter(f => f.ext === '.ts' && f.event !== 'change');
+  const sassFilesNotChanges = changedFiles.filter((f) => f.ext === '.ts' && f.event !== 'change');
   if (sassFilesNotChanges.length) {
     // .ts file was either added or deleted, so we'll have to
     // run sass again to add/remove that .ts file's potential .scss file
     context.sassState = BuildState.RequiresUpdate;
   }
 
-  const htmlFiles = changedFiles.filter(f => f.ext === '.html');
+  const htmlFiles = changedFiles.filter((f) => f.ext === '.html');
   if (htmlFiles.length) {
-    if (context.bundleState === BuildState.SuccessfulBuild && htmlFiles.every(f => f.event === 'change')) {
+    if (context.bundleState === BuildState.SuccessfulBuild && htmlFiles.every((f) => f.event === 'change')) {
       // .html file was changed
       // just doing a template update is fine
       context.templateState = BuildState.RequiresUpdate;
-
     } else {
       // .html file was added/deleted
       // we should do a full transpile build because of this
@@ -375,7 +370,6 @@ export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[
   return changedFiles.concat();
 }
 
-
 const taskInfo: TaskInfo = {
   fullArg: '--watch',
   shortArg: null,
@@ -384,16 +378,15 @@ const taskInfo: TaskInfo = {
   defaultConfigFile: 'watch.config'
 };
 
-
 export interface WatchConfig {
   [index: string]: Watcher;
 }
 
 export interface Watcher {
   // https://www.npmjs.com/package/chokidar
-  paths?: string[]|string;
+  paths?: string[] | string;
   options?: {
-    ignored?: string|string[]|Function;
+    ignored?: string | string[] | Function;
     ignoreInitial?: boolean;
     followSymlinks?: boolean;
     cwd?: string;

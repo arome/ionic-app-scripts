@@ -31,11 +31,14 @@ import { BuildContext, CodegenOptions, File, SemverVersion } from '../util/inter
 export async function runAot(context: BuildContext, options: AotOptions) {
   const tsConfig = getTsConfig(context);
 
-  const angularCompilerOptions = Object.assign({}, {
-    basePath: options.rootDir,
-    genDir: options.rootDir,
-    entryPoint: options.entryPoint
-  });
+  const angularCompilerOptions = Object.assign(
+    {},
+    {
+      basePath: options.rootDir,
+      genDir: options.rootDir,
+      entryPoint: options.entryPoint
+    }
+  );
 
   const aggregateCompilerOption = Object.assign(tsConfig.options, angularCompilerOptions);
 
@@ -69,7 +72,12 @@ export async function runAot(context: BuildContext, options: AotOptions) {
   // update bootstrap in main.ts
   const mailFilePath = isNg5(context.angularVersion) ? changeExtension(options.entryPoint, '.js') : options.entryPoint;
   const mainFile = context.fileCache.get(mailFilePath);
-  const modifiedBootstrapContent = replaceBootstrap(mainFile, options.appNgModulePath, options.appNgModuleClass, options);
+  const modifiedBootstrapContent = replaceBootstrap(
+    mainFile,
+    options.appNgModulePath,
+    options.appNgModuleClass,
+    options
+  );
   mainFile.content = modifiedBootstrapContent;
 
   if (isTranspileRequired(context.angularVersion)) {
@@ -77,14 +85,20 @@ export async function runAot(context: BuildContext, options: AotOptions) {
   }
 }
 
-function errorCheckProgram(context: BuildContext, tsConfig: TsConfig, compilerHost: FileSystemCompilerHost, cachedProgram: Program) {
+function errorCheckProgram(
+  context: BuildContext,
+  tsConfig: TsConfig,
+  compilerHost: FileSystemCompilerHost,
+  cachedProgram: Program
+) {
   // Create a new Program, based on the old one. This will trigger a resolution of all
   // transitive modules, which include files that might just have been generated.
   const program = createProgram(tsConfig.fileNames, tsConfig.options, compilerHost, cachedProgram);
   const globalDiagnostics = program.getGlobalDiagnostics();
-  const tsDiagnostics = program.getSyntacticDiagnostics()
-                    .concat(program.getSemanticDiagnostics())
-                    .concat(program.getOptionsDiagnostics());
+  const tsDiagnostics = program
+    .getSyntacticDiagnostics()
+    .concat(program.getSemanticDiagnostics())
+    .concat(program.getOptionsDiagnostics());
 
   if (globalDiagnostics.length) {
     const diagnostics = runTypeScriptDiagnostics(context, globalDiagnostics);
@@ -123,7 +137,9 @@ export function isTranspileRequired(angularVersion: SemverVersion) {
 }
 
 export function transpileFiles(context: BuildContext, tsConfig: TsConfig, fileSystem: HybridFileSystem) {
-  const tsFiles = context.fileCache.getAll().filter(file => extname(file.path) === '.ts' && file.path.indexOf('.d.ts') === -1);
+  const tsFiles = context.fileCache
+    .getAll()
+    .filter((file) => extname(file.path) === '.ts' && file.path.indexOf('.d.ts') === -1);
   for (const tsFile of tsFiles) {
     Logger.debug(`[AotCompiler] transpileFiles: Transpiling file ${tsFile.path} ...`);
     const transpileOutput = transpileFileContent(tsFile.path, tsFile.content, tsConfig.options);
@@ -173,9 +189,17 @@ export async function runNg4Aot(options: CodegenOptions) {
   });
 }
 
-export async function runNg5Aot(context: BuildContext, tsConfig: TsConfig, aggregateCompilerOptions: CompilerOptions, compilerHost: CompilerHost) {
+export async function runNg5Aot(
+  context: BuildContext,
+  tsConfig: TsConfig,
+  aggregateCompilerOptions: CompilerOptions,
+  compilerHost: CompilerHost
+) {
   const ngTools2 = await import('@angular/compiler-cli/ngtools2');
-  const angularCompilerHost = ngTools2.createCompilerHost({options: aggregateCompilerOptions, tsHost: compilerHost});
+  const angularCompilerHost = ngTools2.createCompilerHost({
+    options: aggregateCompilerOptions,
+    tsHost: compilerHost
+  });
   const program = ngTools2.createProgram({
     rootNames: tsConfig.fileNames,
     options: aggregateCompilerOptions,
@@ -191,15 +215,17 @@ export async function runNg5Aot(context: BuildContext, tsConfig: TsConfig, aggre
     beforeTs: transformations
   };
 
-  const result = program.emit({ emitFlags: ngTools2.EmitFlags.Default, customTransformers: transformers });
+  const result = program.emit({
+    emitFlags: ngTools2.EmitFlags.Default,
+    customTransformers: transformers
+  });
 
-  const tsDiagnostics = program.getTsSyntacticDiagnostics()
-                                .concat(program.getTsOptionDiagnostics())
-                                .concat(program.getTsSemanticDiagnostics());
+  const tsDiagnostics = program
+    .getTsSyntacticDiagnostics()
+    .concat(program.getTsOptionDiagnostics())
+    .concat(program.getTsSemanticDiagnostics());
 
-  const angularDiagnostics = program.getNgStructuralDiagnostics()
-                              .concat(program.getNgOptionDiagnostics());
-
+  const angularDiagnostics = program.getNgStructuralDiagnostics().concat(program.getNgOptionDiagnostics());
 
   if (tsDiagnostics.length) {
     const diagnostics = runTypeScriptDiagnostics(context, tsDiagnostics);

@@ -5,7 +5,6 @@ import * as tinylr from 'tiny-lr';
 import { ServeConfig } from './serve-config';
 import * as events from '../util/events';
 
-
 export function createLiveReloadServer(config: ServeConfig) {
   const liveReloadServer = tinylr();
   liveReloadServer.listen(config.liveReloadPort, config.host);
@@ -16,7 +15,7 @@ export function createLiveReloadServer(config: ServeConfig) {
     if (!hasDiagnostics(config.buildDir)) {
       liveReloadServer.changed({
         body: {
-          files: changedFiles.map(changedFile => '/' + path.relative(config.wwwDir, changedFile.filePath))
+          files: changedFiles.map((changedFile) => '/' + path.relative(config.wwwDir, changedFile.filePath))
         }
       });
     }
@@ -25,10 +24,9 @@ export function createLiveReloadServer(config: ServeConfig) {
   events.on(events.EventType.FileChange, fileChange);
 
   events.on(events.EventType.ReloadApp, () => {
-    fileChange([{ event: 'change', ext: '.html', filePath: 'index.html'}]);
+    fileChange([{ event: 'change', ext: '.html', filePath: 'index.html' }]);
   });
 }
-
 
 export function injectLiveReloadScript(content: any, host: string, port: Number): any {
   let contentStr = content.toString();

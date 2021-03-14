@@ -4,18 +4,16 @@ import { highlight } from '../highlight/highlight';
 import { splitLineBreaks } from '../util/helpers';
 import * as ts from 'typescript';
 
-
 /**
  * Ok, so formatting overkill, we know. But whatever, it makes for great
  * error reporting within a terminal. So, yeah, let's code it up, shall we?
  */
 
 export function runTypeScriptDiagnostics(context: BuildContext, tsDiagnostics: ts.Diagnostic[]) {
-  return tsDiagnostics.map(tsDiagnostic => {
+  return tsDiagnostics.map((tsDiagnostic) => {
     return loadDiagnostic(context, tsDiagnostic);
   });
 }
-
 
 function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
   const d: Diagnostic = {
@@ -66,7 +64,7 @@ function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
       errorLine.errorCharStart--;
     }
 
-    d.header =  Logger.formatHeader('typescript', tsDiagnostic.file.fileName, context.rootDir, errorLine.lineNumber);
+    d.header = Logger.formatHeader('typescript', tsDiagnostic.file.fileName, context.rootDir, errorLine.lineNumber);
 
     if (errorLine.lineIndex > 0) {
       const previousLine: PrintLine = {
@@ -109,4 +107,3 @@ function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
 
   return d;
 }
-

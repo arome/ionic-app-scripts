@@ -7,7 +7,7 @@ import * as transpile from '../transpile';
 
 import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
-import *  as helpers from '../util/helpers';
+import * as helpers from '../util/helpers';
 import { BuildContext, ChangedFile, DeepLinkConfigEntry } from '../util/interfaces';
 import * as tsUtils from '../util/typescript-utils';
 
@@ -32,16 +32,40 @@ describe('util', () => {
       const someOtherFile = join('Users', 'hans-gruber', 'test.ts');
 
       const fileCache = new FileCache();
-      fileCache.set(pageOneTs, { path: pageOneTs, content: knownFileContent});
-      fileCache.set(pageOneHtml, { path: pageOneHtml, content: knownFileContent});
-      fileCache.set(pageOneModule, { path: pageOneModule, content: knownFileContent});
-      fileCache.set(pageTwoTs, { path: pageTwoTs, content: knownFileContent});
-      fileCache.set(pageTwoHtml, { path: pageTwoHtml, content: knownFileContent});
-      fileCache.set(pageTwoModule, { path: pageTwoModule, content: knownFileContent});
-      fileCache.set(pageThreeTs, { path: pageThreeTs, content: knownFileContent});
-      fileCache.set(pageThreeHtml, { path: pageThreeHtml, content: knownFileContent});
-      fileCache.set(pageThreeModule, { path: pageThreeModule, content: knownFileContent});
-      fileCache.set(someOtherFile, { path: someOtherFile, content: knownFileContent});
+      fileCache.set(pageOneTs, { path: pageOneTs, content: knownFileContent });
+      fileCache.set(pageOneHtml, {
+        path: pageOneHtml,
+        content: knownFileContent
+      });
+      fileCache.set(pageOneModule, {
+        path: pageOneModule,
+        content: knownFileContent
+      });
+      fileCache.set(pageTwoTs, { path: pageTwoTs, content: knownFileContent });
+      fileCache.set(pageTwoHtml, {
+        path: pageTwoHtml,
+        content: knownFileContent
+      });
+      fileCache.set(pageTwoModule, {
+        path: pageTwoModule,
+        content: knownFileContent
+      });
+      fileCache.set(pageThreeTs, {
+        path: pageThreeTs,
+        content: knownFileContent
+      });
+      fileCache.set(pageThreeHtml, {
+        path: pageThreeHtml,
+        content: knownFileContent
+      });
+      fileCache.set(pageThreeModule, {
+        path: pageThreeModule,
+        content: knownFileContent
+      });
+      fileCache.set(someOtherFile, {
+        path: someOtherFile,
+        content: knownFileContent
+      });
 
       spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
         if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
@@ -114,7 +138,6 @@ export class HomePage {
       expect(result.defaultHistory[1]).toEqual('page-two');
       expect(result.priority).toEqual('high');
       expect(knownContent.indexOf(result.rawString)).toBeGreaterThan(-1);
-
     });
 
     it('should default to using class name when name is missing', () => {
@@ -172,7 +195,6 @@ export class HomePage {
       expect(result.defaultHistory[1]).toEqual('page-two');
       expect(result.priority).toEqual('high');
       expect(knownContent.indexOf(result.rawString)).toBeGreaterThan(-1);
-
     });
 
     it('should return null segment when not in decorator', () => {
@@ -229,7 +251,6 @@ export class HomePage {
       expect(result.defaultHistory[1]).toEqual('page-two');
       expect(result.priority).toEqual('high');
       expect(knownContent.indexOf(result.rawString)).toBeGreaterThan(-1);
-
     });
 
     it('should return empty array for defaultHistory when not in decorator', () => {
@@ -285,7 +306,6 @@ export class HomePage {
       expect(result.defaultHistory.length).toEqual(0);
       expect(result.priority).toEqual('high');
       expect(knownContent.indexOf(result.rawString)).toBeGreaterThan(-1);
-
     });
 
     it('should return priority of low when not in decorator', () => {
@@ -340,7 +360,6 @@ export class HomePage {
       expect(result.defaultHistory.length).toEqual(0);
       expect(result.priority).toEqual('low');
       expect(knownContent.indexOf(result.rawString)).toBeGreaterThan(-1);
-
     });
 
     it('should return correct defaults when no param passed to decorator', () => {
@@ -394,11 +413,9 @@ export class HomePage {
       expect(result.defaultHistory.length).toEqual(0);
       expect(result.priority).toEqual('low');
       expect(knownContent.indexOf(result.rawString)).toBeGreaterThan(-1);
-
     });
 
     it('should throw an error when multiple deeplink decorators are found', () => {
-
       const knownContent = `
 import { Component } from '@angular/core';
 
@@ -447,7 +464,6 @@ export class HomePage {
       const knownErrorMsg = 'Should never get here';
 
       try {
-
         util.getDeepLinkDecoratorContentForSourceFile(sourceFile);
         throw new Error(knownErrorMsg);
       } catch (ex) {
@@ -501,7 +517,7 @@ export class HomePage {
       expect(result).toEqual(null);
     });
 
-    it('should return null when there isn\'t a class declaration', () => {
+    it("should return null when there isn't a class declaration", () => {
       const knownContent = `
 import {
   CallExpression,
@@ -609,7 +625,10 @@ export class HomePageModule {}
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
       const knownClassName = 'PageOne';
       const fileCache = new FileCache();
-      fileCache.set(pageNgModulePath, { path: pageNgModulePath, content: pageNgModuleContent});
+      fileCache.set(pageNgModulePath, {
+        path: pageNgModulePath,
+        content: pageNgModuleContent
+      });
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
 
       const result = util.getNgModuleDataFromPage(appNgModulePath, pagePath, knownClassName, fileCache, false);
@@ -642,7 +661,10 @@ export class HomePageModule {}
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
       const knownClassName = 'PageOne';
       const fileCache = new FileCache();
-      fileCache.set(pageNgModulePath, { path: pageNgModulePath, content: pageNgModuleContent});
+      fileCache.set(pageNgModulePath, {
+        path: pageNgModulePath,
+        content: pageNgModuleContent
+      });
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
 
       const result = util.getNgModuleDataFromPage(appNgModulePath, pagePath, knownClassName, fileCache, true);
@@ -654,7 +676,6 @@ export class HomePageModule {}
 
   describe('getDeepLinkData', () => {
     it('should return an empty list when no deep link decorators are found', () => {
-
       const pageOneContent = `
 import { Component } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
@@ -821,14 +842,38 @@ export class PageThreeModule {
       const pageSettingsPath = join(prefix, 'pages', 'settings-page', 'settings-page.ts');
 
       const fileCache = new FileCache();
-      fileCache.set(pageOnePath, { path: pageOnePath, content: pageOneContent});
-      fileCache.set(pageOneNgModulePath, { path: pageOneNgModulePath, content: pageOneNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageSettingsPath, { path: pageSettingsPath, content: pageSettingsContent});
-      fileCache.set(pageSettingsNgModulePath, { path: pageSettingsNgModulePath, content: pageSettingsNgModuleContent});
+      fileCache.set(pageOnePath, {
+        path: pageOnePath,
+        content: pageOneContent
+      });
+      fileCache.set(pageOneNgModulePath, {
+        path: pageOneNgModulePath,
+        content: pageOneNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageSettingsPath, {
+        path: pageSettingsPath,
+        content: pageSettingsContent
+      });
+      fileCache.set(pageSettingsNgModulePath, {
+        path: pageSettingsNgModulePath,
+        content: pageSettingsNgModuleContent
+      });
 
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
 
@@ -837,7 +882,6 @@ export class PageThreeModule {
     });
 
     it('should return an a list of deeplink configs from all pages that have them, and not include pages that dont', () => {
-
       const pageOneContent = `
 import { Component } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
@@ -1006,14 +1050,38 @@ export class PageThreeModule {
       const pageSettingsPath = join(srcDir, 'pages', 'settings-page', 'settings-page.ts');
 
       const fileCache = new FileCache();
-      fileCache.set(pageOnePath, { path: pageOnePath, content: pageOneContent});
-      fileCache.set(pageOneNgModulePath, { path: pageOneNgModulePath, content: pageOneNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageSettingsPath, { path: pageSettingsPath, content: pageSettingsContent});
-      fileCache.set(pageSettingsNgModulePath, { path: pageSettingsNgModulePath, content: pageSettingsNgModuleContent});
+      fileCache.set(pageOnePath, {
+        path: pageOnePath,
+        content: pageOneContent
+      });
+      fileCache.set(pageOneNgModulePath, {
+        path: pageOneNgModulePath,
+        content: pageOneNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageSettingsPath, {
+        path: pageSettingsPath,
+        content: pageSettingsContent
+      });
+      fileCache.set(pageSettingsNgModulePath, {
+        path: pageSettingsNgModulePath,
+        content: pageSettingsNgModuleContent
+      });
 
       spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
         if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
@@ -1028,7 +1096,6 @@ export class PageThreeModule {
     });
 
     it('should return an a list of deeplink configs from all pages that have them', () => {
-
       const pageOneContent = `
 import { Component } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
@@ -1199,14 +1266,38 @@ export class PageThreeModule {
       const pageSettingsPath = join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.ts');
 
       const fileCache = new FileCache();
-      fileCache.set(pageOnePath, { path: pageOnePath, content: pageOneContent});
-      fileCache.set(pageOneNgModulePath, { path: pageOneNgModulePath, content: pageOneNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageSettingsPath, { path: pageSettingsPath, content: pageSettingsContent});
-      fileCache.set(pageSettingsNgModulePath, { path: pageSettingsNgModulePath, content: pageSettingsNgModuleContent});
+      fileCache.set(pageOnePath, {
+        path: pageOnePath,
+        content: pageOneContent
+      });
+      fileCache.set(pageOneNgModulePath, {
+        path: pageOneNgModulePath,
+        content: pageOneNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageSettingsPath, {
+        path: pageSettingsPath,
+        content: pageSettingsContent
+      });
+      fileCache.set(pageSettingsNgModulePath, {
+        path: pageSettingsNgModulePath,
+        content: pageSettingsNgModuleContent
+      });
 
       spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
         if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
@@ -1244,7 +1335,9 @@ export class PageThreeModule {
       expect(entryThree.defaultHistory.length).toEqual(2);
       expect(entryThree.defaultHistory[0]).toEqual('page-one');
       expect(entryThree.defaultHistory[1]).toEqual('page-two');
-      expect(entryThree.absolutePath).toEqual(join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts'));
+      expect(entryThree.absolutePath).toEqual(
+        join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts')
+      );
       expect(entryThree.userlandModulePath).toEqual('../pages/settings-page/fake-dir/settings-page.module');
       expect(entryThree.className).toEqual('PageThreeModule');
     });
@@ -1420,14 +1513,38 @@ export class PageThreeModule {
       const pageSettingsPath = join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.ts');
 
       const fileCache = new FileCache();
-      fileCache.set(pageOnePath, { path: pageOnePath, content: pageOneContent});
-      fileCache.set(pageOneNgModulePath, { path: pageOneNgModulePath, content: pageOneNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageTwoPath, { path: pageTwoPath, content: pageTwoContent});
-      fileCache.set(pageTwoNgModulePath, { path: pageTwoNgModulePath, content: pageTwoNgModuleContent});
-      fileCache.set(pageSettingsPath, { path: pageSettingsPath, content: pageSettingsContent});
-      fileCache.set(pageSettingsNgModulePath, { path: pageSettingsNgModulePath, content: pageSettingsNgModuleContent});
+      fileCache.set(pageOnePath, {
+        path: pageOnePath,
+        content: pageOneContent
+      });
+      fileCache.set(pageOneNgModulePath, {
+        path: pageOneNgModulePath,
+        content: pageOneNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageTwoPath, {
+        path: pageTwoPath,
+        content: pageTwoContent
+      });
+      fileCache.set(pageTwoNgModulePath, {
+        path: pageTwoNgModulePath,
+        content: pageTwoNgModuleContent
+      });
+      fileCache.set(pageSettingsPath, {
+        path: pageSettingsPath,
+        content: pageSettingsContent
+      });
+      fileCache.set(pageSettingsNgModulePath, {
+        path: pageSettingsNgModulePath,
+        content: pageSettingsNgModuleContent
+      });
 
       spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
         if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
@@ -1484,7 +1601,6 @@ export class AppModule {}
       const result = util.hasExistingDeepLinkConfig(knownPath, knownContent);
       expect(result).toEqual(true);
     });
-
 
     it('should return false when there isnt a deeplink config', () => {
       const knownContent = `
@@ -1583,7 +1699,6 @@ export class AppModule {}
       const result = util.hasExistingDeepLinkConfig(knownPath, knownContent);
       expect(result).toEqual(true);
     });
-
   });
 
   describe('convertDeepLinkEntryToJsObjectString', () => {
@@ -1600,7 +1715,9 @@ export class AppModule {}
       };
 
       const result = util.convertDeepLinkEntryToJsObjectString(entry);
-      expect(result).toEqual(`{ loadChildren: '../pages/home-page/home-page.module#HomePageModule', name: 'HomePage', segment: null, priority: 'low', defaultHistory: [] }`);
+      expect(result).toEqual(
+        `{ loadChildren: '../pages/home-page/home-page.module#HomePageModule', name: 'HomePage', segment: null, priority: 'low', defaultHistory: [] }`
+      );
     });
 
     it('should handle defaultHistory entries and segment', () => {
@@ -1616,7 +1733,9 @@ export class AppModule {}
       };
 
       const result = util.convertDeepLinkEntryToJsObjectString(entry);
-      expect(result).toEqual(`{ loadChildren: '../pages/home-page/home-page.module#HomePageModule', name: 'HomePage', segment: 'idkMan', priority: 'low', defaultHistory: ['page-two', 'page-three', 'page-four'] }`);
+      expect(result).toEqual(
+        `{ loadChildren: '../pages/home-page/home-page.module#HomePageModule', name: 'HomePage', segment: 'idkMan', priority: 'low', defaultHistory: ['page-two', 'page-three', 'page-four'] }`
+      );
     });
   });
 
@@ -1659,9 +1778,21 @@ export class AppModule {}
 
       const result = util.convertDeepLinkConfigEntriesToString(map);
       expect(result.indexOf('links: [')).toBeGreaterThanOrEqual(0);
-      expect(result.indexOf(`{ loadChildren: '../pages/home-page/home-page.module#HomePageModule', name: 'HomePage', segment: 'idkMan', priority: 'low', defaultHistory: ['page-two', 'page-three', 'page-four'] },`)).toBeGreaterThanOrEqual(0);
-      expect(result.indexOf(`{ loadChildren: '../pages/page-two/page-two.module#PageTwoModule', name: 'PageTwo', segment: null, priority: 'low', defaultHistory: [] },`)).toBeGreaterThanOrEqual(0);
-      expect(result.indexOf(`{ loadChildren: '../pages/settings-page/setting-page.module#SettingsPageModule', name: 'SettingsPage', segment: null, priority: 'low', defaultHistory: [] }`)).toBeGreaterThanOrEqual(0);
+      expect(
+        result.indexOf(
+          `{ loadChildren: '../pages/home-page/home-page.module#HomePageModule', name: 'HomePage', segment: 'idkMan', priority: 'low', defaultHistory: ['page-two', 'page-three', 'page-four'] },`
+        )
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        result.indexOf(
+          `{ loadChildren: '../pages/page-two/page-two.module#PageTwoModule', name: 'PageTwo', segment: null, priority: 'low', defaultHistory: [] },`
+        )
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        result.indexOf(
+          `{ loadChildren: '../pages/settings-page/setting-page.module#SettingsPageModule', name: 'SettingsPage', segment: null, priority: 'low', defaultHistory: [] }`
+        )
+      ).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -1733,7 +1864,6 @@ export class AppModule {}
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
-
     });
 
     it('should append the deeplink config as the third argument when second arg is null', () => {
@@ -1803,7 +1933,6 @@ export class AppModule {}
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
-
     });
 
     it('should append the deeplink config as the third argument when second arg is object', () => {
@@ -1873,7 +2002,6 @@ export class AppModule {}
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
-
     });
 
     it('should replace the third argument with deeplink config', () => {
@@ -1943,7 +2071,6 @@ export class AppModule {}
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
-
     });
   });
 
@@ -2039,9 +2166,11 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
 `;
 
-
       const knownAppNgModulePath = join(process.cwd(), 'myApp', 'src', 'app.module.ts');
-      fileCache.set(knownAppNgModulePath, { path: knownAppNgModulePath, content: ngModuleContent});
+      fileCache.set(knownAppNgModulePath, {
+        path: knownAppNgModulePath,
+        content: ngModuleContent
+      });
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(knownAppNgModulePath);
 
       const changedFiles: ChangedFile[] = [];
@@ -2080,7 +2209,7 @@ export class AboutPage {
 }
 `;
 
-const expectedContent = `
+      const expectedContent = `
 import { Component } from '@angular/core';
 
 import { PopoverController } from 'ionic-angular';
@@ -2226,7 +2355,7 @@ export class AboutPage {
 }
 `;
 
-const expected = `import { Component } from "@angular/core";
+      const expected = `import { Component } from "@angular/core";
 import { } from "ionic-angular";
 @Component({
     selector: "page-about",
@@ -2247,14 +2376,15 @@ export class AboutPage {
   });
 });
 
-
-
 export function transformSourceFile(sourceText: string, transformers: ts.TransformerFactory<ts.SourceFile>[]) {
   const transformed = ts.transform(ts.createSourceFile('source.ts', sourceText, ts.ScriptTarget.ES2015), transformers);
-  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed }, {
+  const printer = ts.createPrinter(
+    { newLine: ts.NewLineKind.LineFeed },
+    {
       onEmitNode: transformed.emitNodeWithNotification,
       substituteNode: transformed.substituteNode
-  });
+    }
+  );
   const result = printer.printBundle(ts.createBundle(transformed.transformed));
   transformed.dispose();
   return result;

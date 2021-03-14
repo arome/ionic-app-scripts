@@ -1,11 +1,8 @@
 import { BuildContext } from '../util/interfaces';
 import { buildIonicGlobal } from './ionic-global';
 
-
 describe('Ionic Global', () => {
-
   describe('buildIonicGlobal', () => {
-
     it('should cache windowIonic', () => {
       const ctx: BuildContext = {
         rootDir: '/Users/elliemae/myapp',
@@ -17,7 +14,5 @@ describe('Ionic Global', () => {
 
       expect(r).toBeDefined();
     });
-
   });
-
 });

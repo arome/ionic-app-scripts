@@ -5,7 +5,6 @@ import { readFileSync } from 'fs';
 import { SassError } from 'node-sass';
 import { splitLineBreaks } from '../util/helpers';
 
-
 export function runSassDiagnostics(context: BuildContext, sassError: SassError) {
   if (!sassError) {
     return [];
@@ -111,15 +110,38 @@ export function runSassDiagnostics(context: BuildContext, sassError: SassError) 
 
           d.lines.push(nextLine);
         }
-
       } catch (e) {
         Logger.debug(`sass loadDiagnostic, ${e}`);
       }
     }
-
   }
 
   return [d];
 }
 
-const STOP_CHARS = ['', '\n', '\r', '\t', ' ', ':', ';', ',', '{', '}', '.', '#', '@', '!', '[', ']', '(', ')', '&', '+', '~', '^', '*', '$'];
+const STOP_CHARS = [
+  '',
+  '\n',
+  '\r',
+  '\t',
+  ' ',
+  ':',
+  ';',
+  ',',
+  '{',
+  '}',
+  '.',
+  '#',
+  '@',
+  '!',
+  '[',
+  ']',
+  '(',
+  ')',
+  '&',
+  '+',
+  '~',
+  '^',
+  '*',
+  '$'
+];

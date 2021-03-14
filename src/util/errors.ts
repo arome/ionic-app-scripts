@@ -1,4 +1,3 @@
-
 export class BuildError extends Error {
   hasBeenLogged = false;
   isFatal: boolean = false;
@@ -14,7 +13,6 @@ export class BuildError extends Error {
     }
   }
 }
-
 
 /* There are special cases where strange things happen where we don't want any logging, etc.
  * For our sake, it is much easier to get off the happy path of code and just throw an exception

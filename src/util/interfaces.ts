@@ -66,13 +66,11 @@ export interface BuildContext {
   typescriptVersion?: SemverVersion;
 }
 
-
 export enum BuildState {
   SuccessfulBuild,
   RequiresUpdate,
   RequiresBuild
 }
-
 
 export interface WorkerMessage {
   taskModule?: string;
@@ -85,12 +83,10 @@ export interface WorkerMessage {
   pid?: number;
 }
 
-
 export interface WorkerProcess {
   task: string;
   worker: any;
 }
-
 
 export interface TaskInfo {
   fullArg: string;
@@ -100,13 +96,11 @@ export interface TaskInfo {
   defaultConfigFile: string;
 }
 
-
 export interface File {
   path: string;
   content: string;
   timestamp?: number;
 }
-
 
 export interface Diagnostic {
   level: string;
@@ -120,7 +114,6 @@ export interface Diagnostic {
   lines: PrintLine[];
 }
 
-
 export interface PrintLine {
   lineIndex: number;
   lineNumber: number;
@@ -130,26 +123,22 @@ export interface PrintLine {
   errorLength: number;
 }
 
-
 export interface WsMessage {
   category: string;
   type: string;
   data: any;
 }
 
-
 export interface BuildUpdateMessage {
   buildId: number;
   reloadApp: boolean;
 }
-
 
 export interface ChangedFile {
   event: string;
   filePath: string;
   ext: string;
 }
-
 
 export interface FileSystem {
   isSync(): boolean;
@@ -166,15 +155,14 @@ export interface FileSystem {
   unlink(filePath: string, callback: Function): void;
 }
 
-
 export interface VirtualFileSystem {
   addVirtualFile(filePath: string, fileContent: string): void;
   getFileContent(filePath: string): string;
   getDirectoryStats(path: string): VirtualDirStats;
   getSubDirs(directoryPath: string): string[];
   getFileNamesInDirectory(directoryPath: string): string[];
-  getAllFileStats():  { [filePath: string]: VirtualFileStats };
-  getAllDirStats():  { [filePath: string]: VirtualDirStats };
+  getAllFileStats(): { [filePath: string]: VirtualFileStats };
+  getAllDirStats(): { [filePath: string]: VirtualDirStats };
 }
 
 export interface DeepLinkDecoratorAndClass {
@@ -192,8 +180,7 @@ export interface DeepLinkPathInfo {
   className: string;
 }
 
-export interface DeepLinkConfigEntry extends DeepLinkDecoratorAndClass, DeepLinkPathInfo {
-}
+export interface DeepLinkConfigEntry extends DeepLinkDecoratorAndClass, DeepLinkPathInfo {}
 
 export interface AppNgModuleInfo {
   absolutePath: string;
@@ -232,18 +219,11 @@ export interface MagicString {
   prependLeft(index: number, contentToPrepend: string): string;
 }
 
-
 export interface CoreCompiler {
   bundle: {
-    (config: {
-      srcDir: string;
-      destDir: string;
-      packages: Packages;
-      debug?: boolean;
-    }): Promise<any>;
+    (config: { srcDir: string; destDir: string; packages: Packages; debug?: boolean }): Promise<any>;
   };
 }
-
 
 export interface Packages {
   path?: any;

@@ -1,7 +1,6 @@
 import { BuildContext } from '../util/interfaces';
 import { getSystemData, toUnixPath } from '../util/helpers';
 
-
 export function buildIonicGlobal(context: BuildContext) {
   context.ionicGlobal = context.ionicGlobal || {};
 
@@ -27,12 +26,9 @@ export function buildIonicGlobal(context: BuildContext) {
   context.ionicGlobal['staticDir'] = `'${staticDir}'`;
 
   // output the JS
-  let o = [
-    '(function(w){',
-    'var i=w.Ionic=w.Ionic||{};'
-  ];
+  let o = ['(function(w){', 'var i=w.Ionic=w.Ionic||{};'];
 
-  Object.keys(context.ionicGlobal).forEach(key => {
+  Object.keys(context.ionicGlobal).forEach((key) => {
     o.push(`i.${key}=${context.ionicGlobal[key]};`);
   });
 
