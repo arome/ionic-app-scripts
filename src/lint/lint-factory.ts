@@ -1,6 +1,6 @@
 import { Configuration, Linter } from 'tslint';
 import { ESLint } from 'eslint';
-import { Program, getPreEmitDiagnostics, Diagnostic } from 'typescript';
+import { Program, getPreEmitDiagnostics, Diagnostic, createProgram, ModuleKind, ScriptTarget } from 'typescript';
 import { BuildContext } from '../util/interfaces';
 import { isObject } from 'util';
 
@@ -47,8 +47,11 @@ export function typeCheck(
  * @param {string} tsConfig
  * @return {Program}
  */
-export function createProgram(context: BuildContext, tsConfig: string): Program {
-  return Linter.createProgram(tsConfig, context.rootDir);
+export function createTsProgram(context: BuildContext, tsConfig: string = ''): Program {
+  return createProgram([context.rootDir], {
+    target: ScriptTarget.ES5,
+    module: ModuleKind.CommonJS
+  });
 }
 
 /**

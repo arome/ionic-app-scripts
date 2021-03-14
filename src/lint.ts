@@ -6,7 +6,7 @@ import { getBooleanPropertyValue } from './util/helpers';
 import { getTsConfigPath } from './transpile';
 import { BuildContext, ChangedFile, TaskInfo } from './util/interfaces';
 import { runWorker } from './worker-client';
-import { createProgram, ModuleKind, ScriptTarget } from 'typescript';
+import { createTsProgram } from './lint/lint-factory';
 
 export interface LintWorkerConfig {
   tsConfig: string;
@@ -55,19 +55,13 @@ export function lintUpdate(changedFiles: ChangedFile[], context: BuildContext, t
 }
 
 export async function lintUpdateWorker(context: BuildContext, { filePaths }: LintWorkerConfig) {
-  const program = createProgram([context.rootDir], {
-    target: ScriptTarget.ES5,
-    module: ModuleKind.CommonJS
-  });
+  const program = createTsProgram(context);
   const logger = new Logger('lint update');
   await lintFiles(context, program, filePaths);
   logger.finish();
 }
 
 function lintApp(context: BuildContext) {
-  const program = createProgram(['.'], {
-    target: ScriptTarget.ES5,
-    module: ModuleKind.CommonJS
-  });
+  const program = createTsProgram(context);
   return lintFiles(context, program);
 }

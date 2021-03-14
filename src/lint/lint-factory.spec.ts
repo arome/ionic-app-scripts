@@ -1,16 +1,15 @@
-import { Configuration, Linter } from 'tslint';
+import { Configuration } from 'tslint';
 import { DiagnosticCategory } from 'typescript';
 import * as ts from 'typescript';
 import { isObject } from 'util';
-import { createLinter, createProgram, getTsLintConfig, lint, typeCheck } from './lint-factory';
+import { createLinter, createTsProgram, getTsLintConfig, lint, typeCheck } from './lint-factory';
 import { ESLint } from 'eslint';
-import { getFileNames, lintFiles } from './lint-utils';
 
 describe('lint factory', () => {
-  describe('createProgram()', () => {
+  describe('createTsProgram()', () => {
     it('should create a TS Program', () => {
       const context: any = { rootDir: '' };
-      const program: any = createProgram(context, '');
+      const program: any = createTsProgram(context, '');
       const fns = ['getSourceFiles', 'getTypeChecker'];
 
       expect(isObject(program)).toBeTruthy();
@@ -55,23 +54,10 @@ describe('lint factory', () => {
     });
   });
 
-  describe('getFileNames()', () => {
-    it('should get the file names referenced in the tsconfig.json', () => {
-      const context: any = { rootDir: '' };
-      const program = createProgram(context, '');
-      const mockFiles = ['test.ts'];
-      spyOn(Linter, 'getFileNames').and.returnValue(mockFiles);
-      const files = getFileNames(context, []);
-
-      expect(Array.isArray(files)).toBeTruthy();
-      expect(files).toEqual(mockFiles);
-    });
-  });
-
   describe('typeCheck()', () => {
     it('should not be called if {typeCheck} is false', (done) => {
       const context: any = { rootDir: '' };
-      const program = createProgram(context, '');
+      const program = createTsProgram(context, '');
 
       spyOn(ts, ts.getPreEmitDiagnostics.name).and.returnValue([]);
 
@@ -84,7 +70,7 @@ describe('lint factory', () => {
 
     it('should type check if {typeCheck} is true', (done) => {
       const context: any = { rootDir: '' };
-      const program = createProgram(context, '');
+      const program = createTsProgram(context, '');
 
       const diagnostics: any = [
         {
@@ -110,7 +96,7 @@ describe('lint factory', () => {
   describe('lint()', () => {
     it('should lint a file', () => {
       const linter = createLinter();
-      spyOn(linter, 'lint').and.returnValue(undefined);
+      spyOn(linter, 'lintFiles').and.returnValue(undefined);
       const filePath = 'test.ts';
 
       lint(linter, filePath);

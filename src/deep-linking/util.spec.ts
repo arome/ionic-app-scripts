@@ -2356,7 +2356,7 @@ export class AboutPage {
 `;
 
       const expected = `import { Component } from "@angular/core";
-import { } from "ionic-angular";
+import {} from "ionic-angular";
 @Component({
     selector: "page-about",
     templateUrl: "about.html"
